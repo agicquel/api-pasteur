@@ -15,14 +15,13 @@ exports.create = function(req, res, next) {
             res.json({
                 status: "success",
                 message: "User successfully created.",
-                data: null
+                data: result
             });
         }
     });
 }
 
 exports.authenticate = function(req, res, next) {
-    console.log(req.body);
     User.findOne({
         login: req.body.login
     }, function(err, userInfo) {

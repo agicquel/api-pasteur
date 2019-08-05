@@ -15,9 +15,17 @@ var User = require('./app/models/users');
 
 // connection to mongodb server
 mongoose.Promise = global.Promise;
-mongoose.connect('mongodb://localhost:27017/db-pasteur', {
-    useNewUrlParser: true
-});
+if(!process.env.MONGO_USERNAME || !process.env.MONGO_PASSWORD || (process.env.MONGO_USERNAME = "" && process.env.MONGO_PASSWORD=="")) {
+    mongoose.connect('mongodb://' + process.env.MONGO_HOST + ':' + process.env.MONGO_PORT + '/' + process.env.MONGO_DATABASE, {
+        useNewUrlParser: true
+    });
+}
+else {
+    mongoose.connect('mongodb://' + process.env.MONGO_USERNAME + ':' + process.env.MONGO_PASSWORD + '@' + process.env.MONGO_HOST + ':' + process.env.MONGO_PORT + '/' + process.env.MONGO_DATABASE , {
+        useNewUrlParser: true
+    });
+}
+
 
 //import routes
 var displaysRoute = require('./app/routes/displaysRoutes');

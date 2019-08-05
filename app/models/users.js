@@ -18,6 +18,11 @@ const UserSchema = new Schema({
         type: String,
         trim: true,
         required: true
+    },
+    role: {
+        type: String,
+        required: true,
+        default: "user"
     }
 }, {
     timestamps: true

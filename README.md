@@ -11,4 +11,3 @@ Then edit .env
 # Launch API
 > npm start
 
-

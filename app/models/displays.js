@@ -1,6 +1,7 @@
 const mongoose = require('mongoose');
 const Schema = mongoose.Schema;
 
+var ObjectId = mongoose.Schema.Types.ObjectId;
 const DisplaySchema = new Schema({
     name: {
         type: String,
@@ -16,6 +17,7 @@ const DisplaySchema = new Schema({
         type: String,
         trim: true,
     },
+    owners : [ObjectId],
     createdAt: {
         type: Date,
         default: Date.now

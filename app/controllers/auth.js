@@ -1,4 +1,6 @@
 var jwt = require('jsonwebtoken');
+var mongoose = require('mongoose');
+var User = mongoose.model('User');
 
 exports.validateUser = function(req, res, next) {
     jwt.verify(req.headers['x-access-token'], req.app.get('secretKey'), function(err, decoded) {
@@ -11,7 +13,12 @@ exports.validateUser = function(req, res, next) {
         } else {
             // add user id to request
             req.body.userId = decoded.id;
-            next();
+            User.findById(req.body.userId, function(err, user) {
+                if(!err && user && user.role) {
+                    req.body.role = user.role;
+                }
+                next();
+            });
         }
     });
 }
