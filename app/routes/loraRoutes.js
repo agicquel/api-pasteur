@@ -1,4 +1,4 @@
-const router = require('express').Router()
+const router = require('express').Router();
 var mongoose = require('mongoose');
 var Display = mongoose.model('Display');
 const auth = require('../controllers/auth');

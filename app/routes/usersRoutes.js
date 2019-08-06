@@ -1,13 +1,17 @@
-const router = require('express').Router()
+const router = require('express').Router();
 const usersController = require('../controllers/usersController');
 const auth = require('../controllers/auth');
 
 if (process.env.USER_REGISTRATION_OPEN_PUBLIC == 'true') {
-    router.post('/user/register', usersController.create);
+    router.post('/users/register', usersController.create);
 }
 else {
-    router.post('/user/register', auth.validateUser, usersController.create);
+    router.post('/users/register', auth.validateUser, usersController.create);
 }
-router.post('/user/authenticate', usersController.authenticate);
+router.post('/users/authenticate', usersController.authenticate);
+router.get('/users', auth.validateUser, usersController.getAll);
+router.get('/users/:id', auth.validateUser, usersController.get);
+router.put('/users/:id', auth.validateUser, usersController.update);
+router.delete('/users/:id', auth.validateUser, usersController.delete);
 
 module.exports = router

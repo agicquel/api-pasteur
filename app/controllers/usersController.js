@@ -51,3 +51,68 @@ exports.authenticate = function(req, res, next) {
         }
     });
 }
+
+exports.getAll = function(req, res) {
+    if(req.body.role == "admin") {
+        User.find({}, function(err, user) {
+            if (err)
+                res.send(err);
+            else
+                res.json(user);
+        });
+    }
+    else {
+        res.send("You are not adminstrator.");
+    }
+};
+
+exports.get = function(req, res) {
+    if(req.body.role == "admin" || req.body.userId == req.params.id) {
+        User.findById(req.params.id, function(err, user) {
+            if (err)
+                res.send(err);
+            else {  
+                res.json(user);
+            }
+        });
+    }
+    else {
+        res.send("You do not have permission to access.")
+    }
+};
+
+exports.update = function(req, res) {
+    if(req.body.role == "admin" || req.body.userId == req.params.id) {
+        User.findOneAndUpdate({
+            _id: req.params.id,
+        }, req.body, {
+            new: true
+        }, function(err, user) {
+            if (err)
+                res.send(err);
+            else
+                res.json(user);
+        });
+    }
+    else {
+        res.send("You do not have permission to access.")
+    }
+};
+
+exports.delete = function(req, res) {
+    if(req.body.role == "admin" || req.body.userId == req.params.id) {
+        User.deleteOne({
+            _id: req.params.id,
+        }, function(err, user) {
+            if (err)
+                res.send(err);
+            else
+                res.json({
+                    message: 'User successfully deleted'
+                });
+        });
+    }
+    else {
+        res.send("You do not have permission to access.")
+    }
+};

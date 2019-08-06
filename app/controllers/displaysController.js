@@ -107,3 +107,58 @@ exports.delete = function(req, res) {
         });
     }
 };
+
+exports.addOwner = function(req, res) {
+    if(!req.body.ownerId || !mongoose.Types.ObjectId.isValid(req.body.ownerId)) {
+        res.send("Bad owner id.");
+    }
+    else {
+        Display.findById(req.params.id, function(err, display) {
+            if (err)
+                res.send(err);
+            else {
+                if(req.body.role == "user" && (!display.owners || !display.owners.includes(req.body.userId))) {
+                    res.send("You do not have permission to access.");
+                }
+                else {
+                    if(!display.owners) {
+                        display.owners = [];
+                    }
+                    if (display.owners.indexOf(req.body.ownerId) === -1){
+                        display.owners.push(req.body.ownerId);
+                    }
+                    display.save();
+                    res.send("Owner added.");
+                }
+            }
+        });
+    }
+};
+
+exports.deleteOwner = function(req, res) {
+    if(!req.body.ownerId || !mongoose.Types.ObjectId.isValid(req.body.ownerId)) {
+        res.send("Bad owner id.");
+    }
+    else {
+        Display.findById(req.params.id, function(err, display) {
+            if (err)
+                res.send(err);
+            else {
+                if(req.body.role == "user" && (!display.owners || !display.owners.includes(req.body.userId))) {
+                    res.send("You do not have permission to access.");
+                }
+                else {
+                    if(!display.owners) {
+                        display.owners = [];
+                    }
+                    var index = display.owners.indexOf(req.body.ownerId);
+                    if (index !== -1){
+                        display.owners.splice(index, 1);
+                    }
+                    display.save();
+                    res.send("Owner deleted.");
+                }
+            }
+        });
+    }
+};
