@@ -27,10 +27,16 @@ router.post('/', auth.validateUser, async (req, res) => {
             else {
                 // Sync messages if needed
                 lopy_req_json.esp_not_sync.forEach(function(esp) {
+                    console.log(esp);
                     Display.findOneAndUpdate(
                         { espId: { "$in" : esp.espid} },
-                        { $set : {"message" : esp.message}}
-                    );
+                        { $set : {"message" : esp.message}},
+                        function(err, display) {
+                            if (err)
+                                console.log(err);
+                            else
+                                console.log(display);
+                        });
                 });
 
                 // Then send the response
