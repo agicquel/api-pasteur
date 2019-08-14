@@ -16,38 +16,53 @@ router.post('/', auth.validateUser, async (req, res) => {
             console.log("req = " + req.body.data)
             let buff = Buffer.from(req.body.data, 'base64');
             console.log("buff = " + buff);
-            let esp_sub = buff.toString('ascii');
-            console.log("esp_sub = " + esp_sub);
-            const esp_sub_json = JSON.parse(esp_sub);
+            let lopy_req = buff.toString('ascii');
+            console.log("lopy_req = " + lopy_req);
+            const lopy_req_json = JSON.parse(lopy_req);
 
-            let displays = await Display.find({
-                espId: { "$in" : esp_sub_json.esp_subscribed}
-            })
+            if(typeof lopy_req_json.esp_subscribed === 'undefined' || typeof lopy_req_json.esp_not_sync === 'undefined') {
+                console.log("Bad parameters");
+                res.status(400).send("Bad parameters");
+            }
+            else {
+                // Sync messages if needed
+                lopy_req_json.esp_not_sync.forEach(function(esp) {
+                    Display.findOneAndUpdate(
+                        { espId: { "$in" : esp.espid} },
+                        { $set : {"message" : esp.message}}
+                    );
+                });
 
-            let response = [];
-            displays.forEach(e => {
-                let message = ""
-                if (e.message != null) {
-                    message = e.message;
-                }
-                let data = {
-                    espId: e.espId,
-                    message: message
-                }
-                response.push(data)
-            })
+                // Then send the response
+                let displays = await Display.find({
+                    espId: { "$in" : lopy_req_json.esp_subscribed}
+                })
 
-            var devEUI = req.body.devEUI;
-            var fport = req.body.fPort;
-            var responseStruct = {
-                'fPort': fport,
-                'data': new Buffer(JSON.stringify(response)).toString("base64"),
-                'devEUI': devEUI
-            };
-
-            console.log(responseStruct)
-            res.end(JSON.stringify(responseStruct));
-            res.end();
+                let response = [];
+                displays.forEach(e => {
+                    let message = ""
+                    if (e.message != null) {
+                        message = e.message;
+                    }
+                    let data = {
+                        espId: e.espId,
+                        message: message
+                    }
+                    response.push(data)
+                })
+    
+                var devEUI = req.body.devEUI;
+                var fport = req.body.fPort;
+                var responseStruct = {
+                    'fPort': fport,
+                    'data': new Buffer(JSON.stringify(response)).toString("base64"),
+                    'devEUI': devEUI
+                };
+    
+                console.log(responseStruct)
+                res.end(JSON.stringify(responseStruct));
+                res.end();
+            }
         }
     } catch (error) {
         console.error(error);

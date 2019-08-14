@@ -16,6 +16,8 @@ const DisplaySchema = new Schema({
     espId: {
         type: String,
         trim: true,
+        unique : true,
+        dropDups: true
     },
     owners : [ObjectId],
     createdAt: {
