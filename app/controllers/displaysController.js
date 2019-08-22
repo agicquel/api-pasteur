@@ -162,3 +162,32 @@ exports.deleteOwner = function(req, res) {
         });
     }
 };
+
+exports.declare = function(req, res) {
+    Display.findOne({ espId: { "$in" : req.params.espid} }, function(err, display) {
+        if (err || !display) {
+            var newDisplay = new Display({name : 'ESP-' + req.params.espid, espId : req.params.espid});
+            newDisplay.owners.push(req.body.userId);
+            newDisplay.save(function(err, display) {
+                if (err)
+                    res.send(err);
+                else
+                    res.json(display);
+            });
+        }
+        else {
+            if(!display.owners) {
+                display.owners = [];
+            }
+            if (display.owners.indexOf(req.body.userId) === -1){
+                display.owners.push(req.body.userId);
+            }
+            display.save(function(err, display) {
+                if (err)
+                    res.send(err);
+                else
+                    res.json(display);
+            });
+        }
+    });
+};

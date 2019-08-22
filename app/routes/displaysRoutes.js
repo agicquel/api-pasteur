@@ -12,4 +12,6 @@ router.delete('/displays/:id', auth.validateUser, displaysController.delete);
 router.post('/displays/addOwner/:id', auth.validateUser, displaysController.addOwner);
 router.post('/displays/deleteOwner/:id', auth.validateUser, displaysController.deleteOwner);
 
+router.get('/displays/declare/:espid', auth.validateUser, displaysController.declare);
+
 module.exports = router;

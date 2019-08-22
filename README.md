@@ -36,6 +36,7 @@ In order to request the API, you have to be authenticated by the API with the x-
 | /displays/:id | DELETE |  | Delete a display |
 | /displays/addOwner/:id | POST | {ownerId} | Add a new owner to a display |
 | /displays/deleteOwner/:id | POST | {ownerId} | Delete an owner of a display |
+| /displays/declare/:espid | GET |  | Add owner if exist otherwise create a new one |
 
 ### Logs routes:
 | Path | HTTP Method | Parameters | Role |
