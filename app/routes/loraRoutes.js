@@ -36,7 +36,7 @@ router.post('/', auth.validateUser, async (req, res) => {
                 // Then send the response
                 let displays = await Display.find({
                     espId: { "$in" : lopy_req_json.esp_subscribed}
-                })
+                });
 
                 let response = [];
                 displays.forEach(e => {
@@ -49,10 +49,15 @@ router.post('/', auth.validateUser, async (req, res) => {
                         message: message
                     }
                     response.push(data)
-                })
+                });
     
                 var devEUI = req.body.devEUI;
                 var fport = req.body.fPort;
+                
+                console.log("date = " + new Date().toISOString().replace(/T/, ' ').replace(/\..+/, ''))
+                console.log("req.body : ");
+                console.log(req.body);
+                
                 var responseStruct = {
                     'fPort': fport,
                     'data': new Buffer(JSON.stringify(response)).toString("base64"),
