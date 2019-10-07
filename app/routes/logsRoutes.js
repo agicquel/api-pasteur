@@ -24,7 +24,7 @@ router.get('/logs/:date', auth.validateUser, async (req, res) => {
 router.get('/console/log', auth.validateUser, async (req, res) => {
     if(req.body.role == "admin") {
         var dir = process.env.DIR_LOG[process.env.DIR_LOG - 1] == '/' ? process.env.DIR_LOG.substr(0, process.env.DIR_LOG.length -1) : process.env.DIR_LOG;
-        var filename = dir + "/console.log";
+        var filename = dir + "console.log";
         logger.debug("filename = " + filename);
         fs.readFile(filename, 'utf8', function(err, data) {
             if (err) res.send(err);
@@ -39,7 +39,7 @@ router.get('/console/log', auth.validateUser, async (req, res) => {
 router.delete('/console/log', auth.validateUser, async (req, res) => {
     if(req.body.role == "admin") {
         var dir = process.env.DIR_LOG[process.env.DIR_LOG - 1] == '/' ? process.env.DIR_LOG.substr(0, process.env.DIR_LOG.length -1) : process.env.DIR_LOG;
-        var filename = dir + "/console.log";
+        var filename = dir + "console.log";
         fs.writeFile(filename, '', function(){res.send('Cleared')})
     }
     else {
