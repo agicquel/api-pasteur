@@ -25,6 +25,8 @@ router.get('/console/log', auth.validateUser, async (req, res) => {
     if(req.body.role == "admin") {
         var dir = process.env.DIR_LOG[process.env.DIR_LOG - 1] == '/' ? process.env.DIR_LOG.substr(0, process.env.DIR_LOG.length -1) : process.env.DIR_LOG;
         var filename = dir + "console.log";
+        console.log("process.env.DIR_LOG = " + process.env.DIR_LOG)
+        console.log("filename = " + filename)
         logger.debug("filename = " + filename);
         fs.readFile(filename, 'utf8', function(err, data) {
             if (err) res.send(err);
