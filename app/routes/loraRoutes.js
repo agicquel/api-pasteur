@@ -2,26 +2,32 @@ const router = require('express').Router();
 var mongoose = require('mongoose');
 var Display = mongoose.model('Display');
 const auth = require('../controllers/auth');
+const util = require('util')
+var log4js = require('log4js');
+var logger = log4js.getLogger('console');
 
 router.post('/', auth.validateUser, async (req, res) => {
 
     try {
         if (!req && !req.body.data) {
-            console.log("Request missing");
+            logger.debug("Request missing");
             res.status(400).send("Request missing");
         } else if (req.body.constructor === Object && Object.keys(req.body).length === 0) {
-            console.log("Request empty");
+            logger.debug("Request empty");
             res.status(400).send("Request empty");
         } else {
-            console.log("req = " + req.body.data)
+            logger.debug(util.inspect(req.body, {showHidden: false, depth: null}))
+
+            logger.debug("req.body = " + req.body)
+            logger.debug("req = " + req.body.data)
             let buff = Buffer.from(req.body.data, 'base64');
-            console.log("buff = " + buff);
+            logger.debug("buff = " + buff);
             let lopy_req = buff.toString('ascii');
-            console.log("lopy_req = " + lopy_req);
+            logger.debug("lopy_req = " + lopy_req);
             const lopy_req_json = JSON.parse(lopy_req);
 
             if(typeof lopy_req_json.esp_subscribed === 'undefined' || typeof lopy_req_json.esp_not_sync === 'undefined') {
-                console.log("Bad parameters");
+                logger.debug("Bad parameters");
                 res.status(400).send("Bad parameters");
             }
             else {
@@ -54,9 +60,9 @@ router.post('/', auth.validateUser, async (req, res) => {
                 var devEUI = req.body.devEUI;
                 var fport = req.body.fPort;
                 
-                console.log("date = " + new Date().toISOString().replace(/T/, ' ').replace(/\..+/, ''))
-                console.log("req.body : ");
-                console.log(req.body);
+                logger.debug("date = " + new Date().toISOString().replace(/T/, ' ').replace(/\..+/, ''))
+                logger.debug("req.body : ");
+                logger.debug(req.body);
                 
                 var responseStruct = {
                     'fPort': fport,
@@ -64,7 +70,7 @@ router.post('/', auth.validateUser, async (req, res) => {
                     'devEUI': devEUI
                 };
     
-                console.log(responseStruct)
+                logger.debug(responseStruct)
                 res.end(JSON.stringify(responseStruct));
                 res.end();
             }

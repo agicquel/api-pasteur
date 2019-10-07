@@ -7,6 +7,7 @@ const port = process.env.PORT || 1337;
 const mongoose = require('mongoose');
 const path = require('path')
 const rfs = require('rotating-file-stream')
+const log4js = require('log4js');
 
 
 // jwt secret token
@@ -45,6 +46,14 @@ var accessLogStream = rfs(function(time, index) {
     path: path.join(__dirname, process.env.DIR_LOG)
 });
 
+log4js.configure({
+    appenders: { console: { type: 'file', filename: 'logs/console.log' } },
+    categories: { default: { appenders: ['console'], level: 'all' } }
+  });
+
+var logger = log4js.getLogger('console');
+logger.debug("testtesttest");
+
 //import routes
 var displaysRoute = require('./app/routes/displaysRoutes');
 var usersRoute = require('./app/routes/usersRoutes');
@@ -64,4 +73,5 @@ app.use(logsRoute);
 
 app.listen(port, () => {
     console.log(`API server started on port : ${port}`);
+    logger.debug("ze parti");
 });
