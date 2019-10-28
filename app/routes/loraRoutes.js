@@ -9,7 +9,7 @@ var logger = log4js.getLogger('console');
 router.post('/', loraController.loraValidate, async (req, res) => {
     try {
         // Sync messages if needed
-        req.body.data.parsedData.esp_not_sync.forEach(function(esp) {
+        req.body.data.parsedDataReq.esp_not_sync.forEach(function(esp) {
             Display.findOneAndUpdate(
                 { espId: { "$in" : esp.espid} },
                 { $set : {"message" : esp.message}}
@@ -18,7 +18,7 @@ router.post('/', loraController.loraValidate, async (req, res) => {
 
         // Then send the response
         let displays = await Display.find({
-            espId: { "$in" : req.body.data.parsedData.esp_subscribed}
+            espId: { "$in" : req.body.data.parsedDataReq.esp_subscribed}
         });
 
         let response = [];

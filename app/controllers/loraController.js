@@ -23,13 +23,14 @@ exports.loraValidate = function(req, res, next) {
                 logger.debug("buff = " + buff);
                 let lopy_req = buff.toString('ascii');
                 logger.debug("lopy_req = " + lopy_req);
-                req.body.data.parsedData = JSON.parse(lopy_req);
+                const lopy_req_json = JSON.parse(lopy_req);
         
-                if(typeof req.body.data.parsedData.esp_subscribed === 'undefined' || typeof req.body.data.parsedData.esp_not_sync === 'undefined') {
+                if(typeof lopy_req_json.esp_subscribed === 'undefined' || typeof lopy_req_json.esp_not_sync === 'undefined') {
                     logger.debug("Bad parameters");
                     res.status(400).send("Bad parameters");
                 }
                 else {
+                    req.body.data.parsedDataReq = lopy_req_json;
                     next();
                 }
             }
