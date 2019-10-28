@@ -12,7 +12,7 @@ exports.loraValidate = function(req, res, next) {
             } else if (req.body.constructor === Object && Object.keys(req.body).length === 0) {
                 logger.debug("Request empty");
                 res.status(400).send("Request empty");
-            } else if (!req.body.body) {
+            } else if (!req.body.data) {
                 logger.debug("Data missing");
                 res.status(400).send("Data missing");
             } else {
