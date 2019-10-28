@@ -7,62 +7,54 @@ var log4js = require('log4js');
 var logger = log4js.getLogger('console');
 
 router.post('/', loraController.loraValidate, async function (req, res) {
-    const lopy_req_json = JSON.parse(lopy_req);
+    try {
+        logger.debug("parsedData after = " + util.inspect(req.body.data.parsedData, {showHidden: false, depth: null}));
 
-    if(typeof lopy_req_json.esp_subscribed === 'undefined' || typeof lopy_req_json.esp_not_sync === 'undefined') {
-        logger.debug("Bad parameters");
-        res.status(400).send("Bad parameters");
-    }
-    else {
-        try {
-            //logger.debug("parsedData after = " + util.inspect(req.body.parsedData, {showHidden: false, depth: null}));
+        // Sync messages if needed
+        req.body.data.parsedData.esp_not_sync.forEach(function(esp) {
+            Display.findOneAndUpdate(
+                { espId: { "$in" : esp.espid} },
+                { $set : {"message" : esp.message}}
+            );
+        });
 
-            // Sync messages if needed
-            lopy_req_json.esp_not_sync.forEach(function(esp) {
-                Display.findOneAndUpdate(
-                    { espId: { "$in" : esp.espid} },
-                    { $set : {"message" : esp.message}}
-                );
-            });
+        // Then send the response
+        let displays = await Display.find({
+            espId: { "$in" : req.body.data.parsedData.esp_subscribed}
+        });
 
-            // Then send the response
-            let displays = await Display.find({
-                espId: { "$in" : lopy_req_json.esp_subscribed}
-            });
-
-            let response = [];
-            displays.forEach(e => {
-                let message = "";
-                if (e.message != null) {
-                    message = e.message;
-                }
-                let data = {
-                    espId: e.espId,
-                    message: message
-                };
-                response.push(data);
-            });
-
-            let devEUI = req.body.devEUI;
-            let fport = req.body.fPort;
-
-            logger.debug("date = " + new Date().toISOString().replace(/T/, ' ').replace(/\..+/, ''));
-            logger.debug("req.body : ");
-            logger.debug(req.body);
-
-            let responseStruct = {
-                'fPort': fport,
-                'data': new Buffer(JSON.stringify(response)).toString("base64"),
-                'devEUI': devEUI
+        let response = [];
+        displays.forEach(e => {
+            let message = "";
+            if (e.message != null) {
+                message = e.message;
+            }
+            let data = {
+                espId: e.espId,
+                message: message
             };
+            response.push(data);
+        });
 
-            logger.debug(responseStruct);
-            res.end(JSON.stringify(responseStruct));
-            res.end();
-        } catch (error) {
-            console.error(error);
-            res.status(400).send("Error while processing");
-        }
+        let devEUI = req.body.devEUI;
+        let fport = req.body.fPort;
+
+        logger.debug("date = " + new Date().toISOString().replace(/T/, ' ').replace(/\..+/, ''));
+        logger.debug("req.body : ");
+        logger.debug(req.body);
+
+        let responseStruct = {
+            'fPort': fport,
+            'data': new Buffer(JSON.stringify(response)).toString("base64"),
+            'devEUI': devEUI
+        };
+
+        logger.debug(responseStruct);
+        res.end(JSON.stringify(responseStruct));
+        res.end();
+    } catch (error) {
+        console.error(error);
+        res.status(400).send("Error while processing");
     }
 });
 
