@@ -14,4 +14,4 @@ router.get('/users/:id', auth.validateUser, usersController.get);
 router.put('/users/:id', auth.validateUser, usersController.update);
 router.delete('/users/:id', auth.validateUser, usersController.delete);
 
-module.exports = router
+module.exports = router;
