@@ -16,10 +16,9 @@ exports.loraValidate = function(req, res, next) {
                 logger.debug("Data missing");
                 res.status(400).send("Data missing");
             } else {
-                logger.debug(util.inspect(req.body, {showHidden: false, depth: null}));
+                logger.debug("req = " + util.inspect(req.body, {showHidden: false, depth: null}));
         
-                logger.debug("req.body = " + req.body);
-                logger.debug("req = " + req.body.data);
+                logger.debug("req data = " + req.body.data);
                 let buff = Buffer.from(req.body.data, 'base64');
                 logger.debug("buff = " + buff);
                 let lopy_req = buff.toString('ascii');
