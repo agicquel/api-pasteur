@@ -8,7 +8,7 @@ var logger = log4js.getLogger('console');
 
 router.post('/', loraController.loraValidate, async function (req, res) {
     try {
-        logger.debug("parsedData after = " + util.inspect(req.body.data.parsedData, {showHidden: false, depth: null}));
+        logger.debug("parsedData after = " + util.inspect(req.body.parsedData, {showHidden: false, depth: null}));
 
         // Sync messages if needed
         req.body.data.parsedData.esp_not_sync.forEach(function(esp) {
