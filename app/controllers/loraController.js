@@ -32,9 +32,9 @@ exports.loraValidate = function(req, res, next) {
                     res.status(400).send("Bad parameters");
                 }
                 else {
-                    delete(req.body.data.parsedData);
-                    req.body.data.parsedData = lopy_req_json;
-                    logger.debug("parsedData before = " + util.inspect(req.body.data.parsedData, {showHidden: false, depth: null}));
+                    delete(req.body.parsedData);
+                    req.body.parsedData = lopy_req_json;
+                    logger.debug("parsedData before = " + util.inspect(req.data.parsedData, {showHidden: false, depth: null}));
 
                     next();
                 }
