@@ -1,21 +1,25 @@
-var jwt = require('jsonwebtoken');
-var mongoose = require('mongoose');
 const auth = require('./auth');
+const log4js = require('log4js');
+const logger = log4js.getLogger('console');
+const util = require('util');
 
 exports.loraValidate = function(req, res, next) {
-    auth.validateUser(req, res, function(req, res, next) {
+    auth.validateUser(req, res, function() {
         try {
-            if (!req && !req.body.data) {
+            if (!req || !'body' in req) {
                 logger.debug("Request missing");
                 res.status(400).send("Request missing");
             } else if (req.body.constructor === Object && Object.keys(req.body).length === 0) {
                 logger.debug("Request empty");
                 res.status(400).send("Request empty");
+            } else if (!req.body.body) {
+                logger.debug("Data missing");
+                res.status(400).send("Data missing");
             } else {
-                logger.debug(util.inspect(req.body, {showHidden: false, depth: null}))
+                logger.debug(util.inspect(req.body, {showHidden: false, depth: null}));
         
-                logger.debug("req.body = " + req.body)
-                logger.debug("req = " + req.body.data)
+                logger.debug("req.body = " + req.body);
+                logger.debug("req = " + req.body.data);
                 let buff = Buffer.from(req.body.data, 'base64');
                 logger.debug("buff = " + buff);
                 let lopy_req = buff.toString('ascii');
@@ -33,9 +37,10 @@ exports.loraValidate = function(req, res, next) {
             }
         }
         catch (error) {
-            console.error(error);
+            logger.debug(error);
             res.status(400).send("Error while processing");
         }
     });
-}
+};
+
 

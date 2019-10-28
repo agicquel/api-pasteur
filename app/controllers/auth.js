@@ -21,4 +21,4 @@ exports.validateUser = function(req, res, next) {
             });
         }
     });
-}
+};
