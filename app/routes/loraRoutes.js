@@ -70,10 +70,7 @@ router.post('/', loraController.loraValidate, async function (req, res) {
                 status.gateways.push(new DataRate(g));
             });
             lopy.status.push(status);
-
-            while(lopy.status.length > 50) {
-                lopy.status.pop();
-            }
+            lopy.status.slice(-50);
             
             lopy.save(function(err, lora) {
                 if (err)
