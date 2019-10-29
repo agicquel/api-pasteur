@@ -66,15 +66,15 @@ router.post('/', loraController.loraValidate, async function (req, res) {
                 time: req.body.time,
             });
 
-            req.body.gateways.forEach(g => {
+            /*req.body.gateways.forEach(g => {
                 status.gateways.push(new DataRate(g));
-            });
+            });*/
             lopy.status.push(status);
             lopy.status.slice(-50);
             
             lopy.save(function(err, lora) {
                 if (err)
-                    logger.debug("Lopy update failed");
+                    logger.debug("Lopy update failed : " + err);
                 else
                     logger.debug("Lopy updated successfully");
             })
