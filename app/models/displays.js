@@ -1,7 +1,8 @@
 const mongoose = require('mongoose');
 const Schema = mongoose.Schema;
+const ObjectId = mongoose.Schema.Types.ObjectId;
+const DisplayModification = require("./displaymodifications").schema;
 
-var ObjectId = mongoose.Schema.Types.ObjectId;
 const DisplaySchema = new Schema({
     name: {
         type: String,
@@ -28,6 +29,7 @@ const DisplaySchema = new Schema({
         type: Date,
         default: Date.now
     },
+    history: [DisplayModification],
 });
 
 module.exports = mongoose.model('Display', DisplaySchema);

@@ -1,10 +1,14 @@
 const router = require('express').Router();
-var mongoose = require('mongoose');
-var Display = mongoose.model('Display');
-const loraController = require('../controllers/loraController');
-const util = require('util');
-var log4js = require('log4js');
-var logger = log4js.getLogger('console');
+const mongoose = require('mongoose');
+const Display = mongoose.model('Display');
+const Lopy = mongoose.model('Lopy');
+const LopyStatus = mongoose.model('LopyStatus');
+const DataRate = mongoose.model('DataRate');
+const Gateway = mongoose.model('Gateway');
+
+const loraController = require('../middleware/loraMiddleware');
+const log4js = require('log4js');
+const logger = log4js.getLogger('console');
 
 router.post('/', loraController.loraValidate, async function (req, res) {
     try {
@@ -15,7 +19,7 @@ router.post('/', loraController.loraValidate, async function (req, res) {
                 { $set : {"message" : esp.message}}
             );
         });
-
+        
         // Then send the response
         let displays = await Display.find({
             espId: { "$in" : res.locals.parsedData.esp_subscribed}
@@ -36,18 +40,33 @@ router.post('/', loraController.loraValidate, async function (req, res) {
 
         let devEUI = req.body.devEUI;
         let fport = req.body.fPort;
-
-        logger.debug("date = " + new Date().toISOString().replace(/T/, ' ').replace(/\..+/, ''));
-        logger.debug("req.body : ");
-        logger.debug(req.body);
-
         let responseStruct = {
             'fPort': fport,
             'data': new Buffer(JSON.stringify(response)).toString("base64"),
             'devEUI': devEUI
         };
 
-        logger.debug(responseStruct);
+        // save Lopy Data //
+        Lopy.findOne({ mac: { "$in" : req.body.devEUI} }, function(err, lopy) {
+            if (err || !lopy) {
+                lopy = new Lopy({mac : req.body.devEUI});
+            }
+            let status = new LopyStatus({
+                $set: req.body,
+                dataRate: new DataRate(req.body.dataRate)
+            });
+            lopy.status.push(status);
+            lopy.save(function(err, lora) {
+                if (err)
+                    logger.debug("Lopy update failed");
+                else
+                    logger.debug("Lopy updated successfully");
+            })
+
+        });
+        ////////////////////
+
+
         res.end(JSON.stringify(responseStruct));
         res.end();
     } catch (error) {

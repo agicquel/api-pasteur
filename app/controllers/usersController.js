@@ -53,7 +53,7 @@ exports.authenticate = function(req, res, next) {
 }
 
 exports.getAll = function(req, res) {
-    if(req.body.role == "admin") {
+    if(res.locals.userRole == "admin") {
         User.find({}, function(err, user) {
             if (err)
                 res.send(err);
@@ -67,7 +67,7 @@ exports.getAll = function(req, res) {
 };
 
 exports.get = function(req, res) {
-    if(req.body.role == "admin" || res.locals.userId == req.params.id) {
+    if(res.locals.userRole == "admin" || res.locals.userId == req.params.id) {
         User.findById(req.params.id, function(err, user) {
             if (err)
                 res.send(err);
@@ -82,7 +82,7 @@ exports.get = function(req, res) {
 };
 
 exports.update = function(req, res) {
-    if(req.body.role == "admin" || res.locals.userId == req.params.id) {
+    if(res.locals.userRole == "admin" || res.locals.userId == req.params.id) {
         User.findOneAndUpdate({
             _id: req.params.id,
         }, req.body, {
@@ -100,7 +100,7 @@ exports.update = function(req, res) {
 };
 
 exports.delete = function(req, res) {
-    if(req.body.role == "admin" || res.locals.userId == req.params.id) {
+    if(res.locals.userRole == "admin" || res.locals.userId == req.params.id) {
         User.deleteOne({
             _id: req.params.id,
         }, function(err, user) {

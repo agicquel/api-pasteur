@@ -15,7 +15,7 @@ exports.validateUser = function(req, res, next) {
             res.locals.userId = decoded.id;
             User.findById(res.locals.userId, function(err, user) {
                 if(!err && user && user.role) {
-                    req.body.role = user.role;
+                    res.locals.userRole = user.role;
                 }
                 next();
             });

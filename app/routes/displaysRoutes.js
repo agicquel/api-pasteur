@@ -1,6 +1,6 @@
 const router = require('express').Router();
 const displaysController = require('../controllers/displaysController');
-const auth = require('../controllers/auth');
+const auth = require('../middleware/authUserMiddleware');
 
 router.get('/displays', auth.validateUser, displaysController.getAll);
 router.post('/displays', auth.validateUser, displaysController.add);

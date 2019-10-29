@@ -1,12 +1,12 @@
 const router = require('express').Router();
-const auth = require('../controllers/auth');
+const auth = require('../middleware/authUserMiddleware');
 const glob = require("glob");
 const fs = require('fs');
 var log4js = require('log4js');
 var logger = log4js.getLogger('console');
 
 router.get('/logs/:date', auth.validateUser, async (req, res) => {
-    if(req.body.role == "admin") {
+    if(res.locals.userRole == "admin") {
         var dir = process.env.DIR_LOG[process.env.DIR_LOG - 1] == '/' ? process.env.DIR_LOG.substr(0, process.env.DIR_LOG.length -1) : process.env.DIR_LOG;
         glob("**/" + dir + "/" + req.params.date + "-*.log", function (er, files) {
             var log = "";
@@ -22,7 +22,7 @@ router.get('/logs/:date', auth.validateUser, async (req, res) => {
 });
 
 router.get('/console/log', auth.validateUser, async (req, res) => {
-    if(req.body.role == "admin") {
+    if(res.locals.userRole == "admin") {
         var dir = process.env.DIR_LOG[process.env.DIR_LOG - 1] == '/' ? process.env.DIR_LOG.substr(0, process.env.DIR_LOG.length -1) : process.env.DIR_LOG;
         var filename = dir + "console.log";
         console.log("process.env.DIR_LOG = " + process.env.DIR_LOG)
@@ -39,7 +39,7 @@ router.get('/console/log', auth.validateUser, async (req, res) => {
 });
 
 router.delete('/console/log', auth.validateUser, async (req, res) => {
-    if(req.body.role == "admin") {
+    if(res.locals.userRole == "admin") {
         var dir = process.env.DIR_LOG[process.env.DIR_LOG - 1] == '/' ? process.env.DIR_LOG.substr(0, process.env.DIR_LOG.length -1) : process.env.DIR_LOG;
         var filename = dir + "console.log";
         fs.writeFile(filename, '', function(){res.send('Cleared')})
