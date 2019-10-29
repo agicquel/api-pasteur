@@ -4,7 +4,6 @@ const DataRate = require("./datarates").schema;
 const Gateway = require("./gateways").schema;
 
 const LopyStatus = new Schema({
-    name: String,
     devEUI: String,
     appEUI: String ,
     fPort: Number ,
