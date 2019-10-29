@@ -53,6 +53,7 @@ router.post('/', loraController.loraValidate, async function (req, res) {
             }
 
             let status = new LopyStatus({
+                mac: lopy.mac,
                 devEUI: req.body.devEUI,
                 appEUI: req.body.appEUI ,
                 fPort: req.body.fPort ,
