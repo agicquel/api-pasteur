@@ -51,11 +51,30 @@ router.post('/', loraController.loraValidate, async function (req, res) {
             if (err || !lopy) {
                 lopy = new Lopy({mac : req.body.devEUI});
             }
+
             let status = new LopyStatus({
-                $set: req.body,
-                dataRate: new DataRate(req.body.dataRate)
+                devEUI: req.body.devEUI,
+                appEUI: req.body.appEUI ,
+                fPort: req.body.fPort ,
+                gatewayCount: req.body.gatewayCount,
+                rssi: req.body.rssi,
+                loRaSNR: req.body.loRaSNR,
+                frequency: req.body.frequency,
+                dataRate: new DataRate(req.body.dataRate),
+                devAddr: req.body.devAddr,
+                fCntUp: req.body.fCntUp,
+                time: req.body.time,
+            });
+
+            req.body.gateways.forEach(g => {
+                status.gateways.push(new DataRate(g));
             });
             lopy.status.push(status);
+
+            while(lopy.status.length > 50) {
+                lopy.status.pop();
+            }
+            
             lopy.save(function(err, lora) {
                 if (err)
                     logger.debug("Lopy update failed");
