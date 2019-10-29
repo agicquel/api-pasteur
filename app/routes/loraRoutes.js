@@ -8,8 +8,6 @@ var logger = log4js.getLogger('console');
 
 router.post('/', loraController.loraValidate, async function (req, res) {
     try {
-        logger.debug("parsedData after = " + util.inspect(res.locals.parsedData, {showHidden: false, depth: null}));
-
         // Sync messages if needed
         res.locals.parsedData.esp_not_sync.forEach(function(esp) {
             Display.findOneAndUpdate(
