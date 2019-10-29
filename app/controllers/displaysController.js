@@ -11,7 +11,7 @@ exports.getAll = function(req, res) {
         });
     }
     else if(req.body.role == "user") {
-        Display.find({owners: {"$in" : req.body.userId}}, function(err, display) {
+        Display.find({owners: {"$in" : res.locals.userId}}, function(err, display) {
             if (err)
                 res.send(err);
             else
@@ -22,7 +22,7 @@ exports.getAll = function(req, res) {
 
 exports.add = function(req, res) {
     var newDisplay = new Display({name : req.body.name, message: req.body.message, espId : req.body.espId});
-    newDisplay.owners.push(req.body.userId);
+    newDisplay.owners.push(res.locals.userId);
     newDisplay.save(function(err, display) {
         if (err)
             res.send(err);
@@ -40,7 +40,7 @@ exports.get = function(req, res) {
                 res.json(display);
             }
             else if(req.body.role == "user") {
-                if(!display.owners || !display.owners.includes(req.body.userId)) {
+                if(!display.owners || !display.owners.includes(res.locals.userId)) {
                     res.send("You do not have permission to access.")
                 }
                 else
@@ -66,7 +66,7 @@ exports.update = function(req, res) {
     else if(req.body.role == "user") {
         Display.findOneAndUpdate({
             _id: req.params.id,
-            owners: {"$in" : req.body.userId}
+            owners: {"$in" : res.locals.userId}
         }, req.body, {
             new: true
         }, function(err, display) {
@@ -95,7 +95,7 @@ exports.delete = function(req, res) {
     else if(req.body.role == "user") {
         Display.deleteOne({
             _id: req.params.id,
-            owners: {"$in" : req.body.userId}
+            owners: {"$in" : res.locals.userId}
         }, function(err, display) {
             
             if (err)
@@ -117,7 +117,7 @@ exports.addOwner = function(req, res) {
             if (err)
                 res.send(err);
             else {
-                if(req.body.role == "user" && (!display.owners || !display.owners.includes(req.body.userId))) {
+                if(req.body.role == "user" && (!display.owners || !display.owners.includes(res.locals.userId))) {
                     res.send("You do not have permission to access.");
                 }
                 else {
@@ -144,7 +144,7 @@ exports.deleteOwner = function(req, res) {
             if (err)
                 res.send(err);
             else {
-                if(req.body.role == "user" && (!display.owners || !display.owners.includes(req.body.userId))) {
+                if(req.body.role == "user" && (!display.owners || !display.owners.includes(res.locals.userId))) {
                     res.send("You do not have permission to access.");
                 }
                 else {
@@ -167,7 +167,7 @@ exports.declare = function(req, res) {
     Display.findOne({ espId: { "$in" : req.params.espid} }, function(err, display) {
         if (err || !display) {
             var newDisplay = new Display({name : 'ESP-' + req.params.espid, espId : req.params.espid});
-            newDisplay.owners.push(req.body.userId);
+            newDisplay.owners.push(res.locals.userId);
             newDisplay.save(function(err, display) {
                 if (err)
                     res.send(err);
@@ -179,8 +179,8 @@ exports.declare = function(req, res) {
             if(!display.owners) {
                 display.owners = [];
             }
-            if (display.owners.indexOf(req.body.userId) === -1){
-                display.owners.push(req.body.userId);
+            if (display.owners.indexOf(res.locals.userId) === -1){
+                display.owners.push(res.locals.userId);
             }
             display.save(function(err, display) {
                 if (err)

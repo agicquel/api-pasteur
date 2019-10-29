@@ -12,8 +12,8 @@ exports.validateUser = function(req, res, next) {
             });
         } else {
             // add user id to request
-            req.body.userId = decoded.id;
-            User.findById(req.body.userId, function(err, user) {
+            res.locals.userId = decoded.id;
+            User.findById(res.locals.userId, function(err, user) {
                 if(!err && user && user.role) {
                     req.body.role = user.role;
                 }

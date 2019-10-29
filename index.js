@@ -61,7 +61,7 @@ var loraRoute = require('./app/routes/loraRoutes');
 var logsRoute = require('./app/routes/logsRoutes');
 
 // load configs and routes
-app.use(morgan('combined', { stream: accessLogStream }))
+app.use(morgan('combined', { stream: accessLogStream }));
 app.use(bodyParser.urlencoded({
     extended: false
 }));
