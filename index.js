@@ -69,6 +69,7 @@ logger.debug("testtesttest");
 var displaysRoute = require('./app/routes/displaysRoutes');
 var usersRoute = require('./app/routes/usersRoutes');
 var loraRoute = require('./app/routes/loraRoutes');
+var lopysRoute = require('./app/routes/lopysRoutes');
 var logsRoute = require('./app/routes/logsRoutes');
 
 // load configs and routes
@@ -80,6 +81,7 @@ app.use(bodyParser.json());
 app.use(usersRoute);
 app.use(displaysRoute);
 app.use(loraRoute);
+app.use(lopysRoute);
 app.use(logsRoute);
 
 app.listen(port, () => {
