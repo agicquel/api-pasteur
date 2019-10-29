@@ -1,4 +1,4 @@
-const auth = require('./auth');
+const auth = require('./authUserMiddleware');
 const log4js = require('log4js');
 const logger = log4js.getLogger('console');
 const util = require('util');

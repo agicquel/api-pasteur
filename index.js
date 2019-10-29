@@ -5,8 +5,8 @@ const morgan = require('morgan');
 const bodyParser = require('body-parser');
 const port = process.env.PORT || 1337;
 const mongoose = require('mongoose');
-const path = require('path')
-const rfs = require('rotating-file-stream')
+const path = require('path');
+const rfs = require('rotating-file-stream');
 const log4js = require('log4js');
 
 
@@ -14,19 +14,30 @@ const log4js = require('log4js');
 app.set('secretKey', process.env.JWT_KEY || 'nodeRestApi');
 
 // load models
-var Display = require('./app/models/displays');
-var User = require('./app/models/users');
+require('./app/models/displaymodifications');
+require('./app/models/displays');
+require('./app/models/users');
+require('./app/models/datarates');
+require('./app/models/gateways');
+require('./app/models/lopystatus');
+require('./app/models/lopys');
 
 // connection to mongodb server
 mongoose.Promise = global.Promise;
 if(!process.env.MONGO_USERNAME || !process.env.MONGO_PASSWORD || (process.env.MONGO_USERNAME = "" && process.env.MONGO_PASSWORD=="")) {
     mongoose.connect('mongodb://' + process.env.MONGO_HOST + ':' + process.env.MONGO_PORT + '/' + process.env.MONGO_DATABASE, {
-        useNewUrlParser: true
+        useNewUrlParser: true,
+        useUnifiedTopology: true,
+        useFindAndModify: false,
+        useCreateIndex: true
     });
 }
 else {
     mongoose.connect('mongodb://' + process.env.MONGO_USERNAME + ':' + process.env.MONGO_PASSWORD + '@' + process.env.MONGO_HOST + ':' + process.env.MONGO_PORT + '/' + process.env.MONGO_DATABASE , {
-        useNewUrlParser: true
+        useNewUrlParser: true,
+        useUnifiedTopology: true,
+        useFindAndModify: false,
+        useCreateIndex: true
     });
 }
 
