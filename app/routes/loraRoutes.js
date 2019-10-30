@@ -45,7 +45,7 @@ router.post('/', loraController.loraValidate, async function (req, res) {
             'devEUI': devEUI
         };
 
-        // save Lopy Data //
+        // save Lopy status
         Lopy.findOne({ mac: { "$in" : req.body.devEUI} }, function(err, lopy) {
             if (err || !lopy) {
                 lopy = new Lopy({mac: req.body.devEUI});
@@ -82,11 +82,12 @@ router.post('/', loraController.loraValidate, async function (req, res) {
                     dataRate: new DataRate(g.dataRate)
                 }));
             });
+
             lopy.status.push(status);
-            //let arrSize = lopy.status.length;
-            //lopy.status.slice((arrSize < 50 ? 0 : arrSize - 50), 50);
-            while(lopy.status.length > 20) {
-                lopy.status.pop();
+
+            // Keep only the 100st status
+            while(lopy.status.length > 100) {
+                lopy.status.shift();
             }
             
             lopy.save(function(err, lora) {
@@ -97,8 +98,6 @@ router.post('/', loraController.loraValidate, async function (req, res) {
             })
 
         });
-        ////////////////////
-
 
         res.end(JSON.stringify(responseStruct));
         res.end();
