@@ -19,3 +19,22 @@ exports.getAll = function(req, res) {
         res.send("You do not have permission to access.");
     }
 };
+
+exports.delete = function(req, res) {
+    if(res.locals.userRole == "admin") {
+        Lopy.deleteOne({
+            _id: req.params.id,
+        }, function(err, display) {
+
+            if (err)
+                res.send(err);
+            else
+                res.json({
+                    message: 'Lopy successfully deleted'
+                });
+        });
+    }
+    else if(res.locals.userRole == "user") {
+        res.send("You do not have permission to access.");
+    }
+};

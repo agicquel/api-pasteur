@@ -7,6 +7,7 @@ const Lopy = new Schema({
         type: String,
         trim: true,
         required: true,
+        unique: true
     },
     status: [LopyStatus]
 });

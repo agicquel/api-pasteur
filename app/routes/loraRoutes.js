@@ -49,7 +49,7 @@ router.post('/', loraController.loraValidate, async function (req, res) {
         // save Lopy Data //
         Lopy.findOne({ mac: { "$in" : req.body.devEUI} }, function(err, lopy) {
             if (err || !lopy) {
-                lopy = new Lopy({mac : req.body.devEUI});
+                lopy = new Lopy({mac: req.body.devEUI});
             }
 
             let status = new LopyStatus({
