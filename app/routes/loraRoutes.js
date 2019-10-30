@@ -34,12 +34,15 @@ router.post('/', loraController.loraValidate, async function (req, res) {
             if (e.message != null) {
                 message = e.message;
             }
-            e.lastLopy = req.body.devEUI;
             let data = {
                 espId: e.espId,
                 message: message
             };
             response.push(data);
+
+            // update last lopy attribute
+            e.lastLopy = req.body.devEUI;
+            e.save();
         });
 
         let devEUI = req.body.devEUI;
