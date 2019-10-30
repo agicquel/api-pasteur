@@ -5,6 +5,8 @@ const Lopy = mongoose.model('Lopy');
 const LopyStatus = mongoose.model('LopyStatus');
 const DataRate = mongoose.model('DataRate');
 const Gateway = mongoose.model('Gateway');
+const util = require('util');
+
 
 const loraController = require('../middleware/loraMiddleware');
 const log4js = require('log4js');
@@ -69,10 +71,11 @@ router.post('/', loraController.loraValidate, async function (req, res) {
 
             req.body.gateways.forEach(g => {
                 //status.gateways.push(new DataRate(g));
-                logger.debug("Gateways : " + g);
+                logger.debug("Gateways : " + util.inspect(g, {showHidden: false, depth: null}));
             });
             lopy.status.push(status);
-            lopy.status.slice(50);
+            let arrSize = lopy.status.length;
+            lopy.status.slice((arrSize < 50 ? 0 : arrSize - 50), 50);
             
             lopy.save(function(err, lora) {
                 if (err)
