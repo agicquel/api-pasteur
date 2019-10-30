@@ -24,7 +24,7 @@ require('./app/models/lopys');
 
 // connection to mongodb server
 mongoose.Promise = global.Promise;
-if(!process.env.MONGO_USERNAME || !process.env.MONGO_PASSWORD || (process.env.MONGO_USERNAME = "" && process.env.MONGO_PASSWORD=="")) {
+if(!process.env.MONGO_USERNAME || !process.env.MONGO_PASSWORD || (process.env.MONGO_USERNAME === "" && process.env.MONGO_PASSWORD === "")) {
     mongoose.connect('mongodb://' + process.env.MONGO_HOST + ':' + process.env.MONGO_PORT + '/' + process.env.MONGO_DATABASE, {
         useNewUrlParser: true,
         useUnifiedTopology: true,
