@@ -8,7 +8,7 @@ const Gateway = mongoose.model('Gateway');
 const loraController = require('../middleware/loraMiddleware');
 const log4js = require('log4js');
 const logger = log4js.getLogger('console');
-var DisplayModification = mongoose.model('DisplayModification');
+const DisplayModification = mongoose.model('DisplayModification');
 
 router.post('/', loraController.loraValidate, async function (req, res) {
     try {
@@ -98,13 +98,7 @@ router.post('/', loraController.loraValidate, async function (req, res) {
                 lopy.status.shift();
             }
             
-            lopy.save(function(err, lora) {
-                if (err)
-                    logger.debug("Lopy update failed : " + err);
-                else
-                    logger.debug("Lopy updated successfully");
-            })
-
+            lopy.save();
         });
 
         res.end(JSON.stringify(responseStruct));

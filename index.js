@@ -45,11 +45,12 @@ else {
 function pad(num) {
     return (num > 9 ? "" : "0") + num;
 }
-var accessLogStream = rfs(function(time, index) {
+
+let accessLogStream = rfs(function (time, index) {
     if (!time) return "access.log";
-    var year = time.getFullYear();
-    var month = pad(time.getMonth() + 1);
-    var day = pad(time.getDate());
+    const year = time.getFullYear();
+    const month = pad(time.getMonth() + 1);
+    const day = pad(time.getDate());
     return year + month + day + "-" + index + ".log";
 }, {
     interval: '1d', // rotate daily
@@ -62,15 +63,15 @@ log4js.configure({
     categories: { default: { appenders: ['console'], level: 'all' } }
   });
 
-var logger = log4js.getLogger('console');
+let logger = log4js.getLogger('console');
 logger.debug("testtesttest");
 
 //import routes
-var displaysRoute = require('./app/routes/displaysRoutes');
-var usersRoute = require('./app/routes/usersRoutes');
-var loraRoute = require('./app/routes/loraRoutes');
-var lopysRoute = require('./app/routes/lopysRoutes');
-var logsRoute = require('./app/routes/logsRoutes');
+let displaysRoute = require('./app/routes/displaysRoutes');
+let usersRoute = require('./app/routes/usersRoutes');
+let loraRoute = require('./app/routes/loraRoutes');
+let lopysRoute = require('./app/routes/lopysRoutes');
+let logsRoute = require('./app/routes/logsRoutes');
 
 // load configs and routes
 app.use(morgan('combined', { stream: accessLogStream }));
@@ -86,5 +87,5 @@ app.use(logsRoute);
 
 app.listen(port, () => {
     console.log(`API server started on port : ${port}`);
-    logger.debug("ze parti");
+    logger.debug(`API server started on port : ${port}`);
 });

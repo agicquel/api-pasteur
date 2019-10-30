@@ -1,6 +1,6 @@
-var mongoose = require('mongoose');
-var Display = mongoose.model('Display');
-var DisplayModification = mongoose.model('DisplayModification');
+const mongoose = require('mongoose');
+const Display = mongoose.model('Display');
+const DisplayModification = mongoose.model('DisplayModification');
 
 exports.getAll = function(req, res) {
     if(res.locals.userRole == "admin") {

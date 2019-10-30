@@ -2,8 +2,8 @@ const router = require('express').Router();
 const auth = require('../middleware/authUserMiddleware');
 const glob = require("glob");
 const fs = require('fs');
-var log4js = require('log4js');
-var logger = log4js.getLogger('console');
+const log4js = require('log4js');
+const logger = log4js.getLogger('console');
 
 router.get('/logs/:date', auth.validateUser, async (req, res) => {
     if(res.locals.userRole == "admin") {
@@ -49,4 +49,4 @@ router.delete('/console/log', auth.validateUser, async (req, res) => {
     }
 });
 
-module.exports = router
+module.exports = router;

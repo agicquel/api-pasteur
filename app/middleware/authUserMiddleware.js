@@ -1,6 +1,6 @@
-var jwt = require('jsonwebtoken');
-var mongoose = require('mongoose');
-var User = mongoose.model('User');
+const jwt = require('jsonwebtoken');
+const mongoose = require('mongoose');
+const User = mongoose.model('User');
 
 exports.validateUser = function(req, res, next) {
     jwt.verify(req.headers['x-access-token'], req.app.get('secretKey'), function(err, decoded) {

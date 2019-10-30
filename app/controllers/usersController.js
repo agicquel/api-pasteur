@@ -1,7 +1,7 @@
-var bcrypt = require('bcrypt');
-var jwt = require('jsonwebtoken');
-var mongoose = require('mongoose');
-var User = mongoose.model('User');
+const bcrypt = require('bcrypt');
+const jwt = require('jsonwebtoken');
+const mongoose = require('mongoose');
+const User = mongoose.model('User');
 
 exports.create = function(req, res, next) {
     User.create({
@@ -19,7 +19,7 @@ exports.create = function(req, res, next) {
             });
         }
     });
-}
+};
 
 exports.authenticate = function(req, res, next) {
     User.findOne({
@@ -50,7 +50,7 @@ exports.authenticate = function(req, res, next) {
             }
         }
     });
-}
+};
 
 exports.getAll = function(req, res) {
     if(res.locals.userRole == "admin") {

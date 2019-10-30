@@ -1,10 +1,5 @@
-var bcrypt = require('bcrypt');
-var jwt = require('jsonwebtoken');
-var mongoose = require('mongoose');
-var Lopy = mongoose.model('Lopy');
-var LopyStatus = mongoose.model('LopyStatus');
-var User = mongoose.model('User');
-
+const mongoose = require('mongoose');
+const Lopy = mongoose.model('Lopy');
 
 exports.getAll = function(req, res) {
     Lopy.find({}, function(err, lopys) {
