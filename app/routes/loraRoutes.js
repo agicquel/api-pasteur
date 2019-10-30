@@ -70,8 +70,20 @@ router.post('/', loraController.loraValidate, async function (req, res) {
             });
 
             req.body.gateways.forEach(g => {
-                //status.gateways.push(new DataRate(g));
-                logger.debug("Gateways : " + util.inspect(g, {showHidden: false, depth: null}));
+                status.gateways.push(new Gateway({
+                    mac: g.mac,
+                    time: g.time,
+                    timestamp: g.timestamp,
+                    frequency: g.frequency,
+                    channel: g.channel,
+                    rfChain: g.rfChain,
+                    crcStatus: g.crcStatus,
+                    codeRate: g.codeRate,
+                    rssi: g.rssi,
+                    loRaSNR: g.loRaSNR,
+                    size: g.size,
+                    dataRate: new DataRate(g.dataRate)
+                }));
             });
             lopy.status.push(status);
             let arrSize = lopy.status.length;

@@ -17,7 +17,7 @@ const GatewaySchema = new Schema({
     rssi: Number,
     loRaSNR: Number,
     size: Number,
-    dataRate: [DataRate]
+    dataRate: DataRate
 });
 
 module.exports = mongoose.model('Gateway', GatewaySchema);
