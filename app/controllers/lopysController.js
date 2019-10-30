@@ -7,31 +7,37 @@ var User = mongoose.model('User');
 
 
 exports.getAll = function(req, res) {
-    if(res.locals.userRole == "admin") {
-        Lopy.find({}, function(err, lopys) {
-            if (err)
-                res.send(err);
-            else
-                res.json(lopys);
-        });
-    }
-    else if(res.locals.userRole == "user") {
-        res.send("You do not have permission to access.");
-    }
+    Lopy.find({}, function(err, lopys) {
+        if (err)
+            res.send(err);
+        else
+            res.json(lopys);
+    });
+};
+
+exports.get = function(req, res) {
+    Lopy.findOne({mac: req.params.mac}, function(err, lopy) {
+        if (err)
+            res.send(err);
+        else {
+            res.json(lopy);
+        }
+    });
 };
 
 exports.delete = function(req, res) {
     if(res.locals.userRole == "admin") {
         Lopy.deleteOne({
-            _id: req.params.id,
-        }, function(err, display) {
-
-            if (err)
+            mac: req.params.mac,
+        }, function(err, lopy) {
+            if (err) {
                 res.send(err);
-            else
+            }
+            else {
                 res.json({
                     message: 'Lopy successfully deleted'
                 });
+            }
         });
     }
     else if(res.locals.userRole == "user") {

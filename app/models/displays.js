@@ -21,6 +21,9 @@ const DisplaySchema = new Schema({
         dropDups: true
     },
     owners : [ObjectId],
+    lastLopy: {
+        type: String
+    },
     createdAt: {
         type: Date,
         default: Date.now

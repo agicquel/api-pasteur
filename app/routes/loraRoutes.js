@@ -8,6 +8,7 @@ const Gateway = mongoose.model('Gateway');
 const loraController = require('../middleware/loraMiddleware');
 const log4js = require('log4js');
 const logger = log4js.getLogger('console');
+var DisplayModification = mongoose.model('DisplayModification');
 
 router.post('/', loraController.loraValidate, async function (req, res) {
     try {
@@ -15,7 +16,10 @@ router.post('/', loraController.loraValidate, async function (req, res) {
         res.locals.parsedData.esp_not_sync.forEach(function(esp) {
             Display.findOneAndUpdate(
                 { espId: { "$in" : esp.espid} },
-                { $set : {"message" : esp.message}}
+                {
+                    $set : {"message" : esp.message},
+                    $push: { history : new DisplayModification({modifierId:req.body.devEUI, modifierType:"lopy"})}
+                }
             );
         });
         
@@ -30,6 +34,7 @@ router.post('/', loraController.loraValidate, async function (req, res) {
             if (e.message != null) {
                 message = e.message;
             }
+            e.lastLopy = req.body.devEUI;
             let data = {
                 espId: e.espId,
                 message: message
