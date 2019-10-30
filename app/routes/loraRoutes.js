@@ -5,9 +5,6 @@ const Lopy = mongoose.model('Lopy');
 const LopyStatus = mongoose.model('LopyStatus');
 const DataRate = mongoose.model('DataRate');
 const Gateway = mongoose.model('Gateway');
-const util = require('util');
-
-
 const loraController = require('../middleware/loraMiddleware');
 const log4js = require('log4js');
 const logger = log4js.getLogger('console');
@@ -86,8 +83,11 @@ router.post('/', loraController.loraValidate, async function (req, res) {
                 }));
             });
             lopy.status.push(status);
-            let arrSize = lopy.status.length;
-            lopy.status.slice((arrSize < 50 ? 0 : arrSize - 50), 50);
+            //let arrSize = lopy.status.length;
+            //lopy.status.slice((arrSize < 50 ? 0 : arrSize - 50), 50);
+            while(lopy.status.length > 20) {
+                lopy.status.pop();
+            }
             
             lopy.save(function(err, lora) {
                 if (err)
