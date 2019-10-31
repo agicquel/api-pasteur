@@ -13,52 +13,59 @@ const DisplayModification = mongoose.model('DisplayModification');
 router.post('/', loraController.loraValidate, async function (req, res) {
     try {
         // Sync messages if needed
-        res.locals.parsedData.m.forEach(function(esp) {
-            Display.findOneAndUpdate(
-                { espId: { "$in" : esp.espid} },
-                {
-                    $set : {"message" : esp.message},
-                    $push: { history : new DisplayModification({modifierId:req.body.devEUI, modifierType:"lopy"})}
+        if(res.locals.parsedData.m) {
+            res.locals.parsedData.m.forEach(function(esp) {
+                Display.findOneAndUpdate(
+                    { espId: { "$in" : esp.espid} },
+                    {
+                        $set : {"message" : esp.message},
+                        $push: { history : new DisplayModification({modifierId:req.body.devEUI, modifierType:"lopy"})}
+                    }
+                );
+            });
+        }
+
+        if(res.locals.parsedData.d) {
+            res.locals.parsedData.d.forEach(function (espId) {
+                if(res.locals.lopy.esp.contains(espId)) {
+                    res.locals.lopy.esp.splice(res.locals.lopy.esp.splice.indexOf(espId), 1);
                 }
-            );
-        });
+            });
+        }
 
-        res.locals.parsedData.d.forEach(function (espId) {
-            if(res.locals.lopy.esp.contains(espId)) {
-                res.locals.lopy.esp.splice(res.locals.lopy.esp.splice.indexOf(espId), 1);
-            }
-        });
+        let response = [];
+        if(res.locals.parsedData.c) {
+            res.locals.parsedData.c.forEach(function (espId) {
+                if(!res.locals.lopy.esp.contains(espId)) {
+                    res.locals.lopy.esp.push(espId);
+                }
+            });
 
-        res.locals.parsedData.c.forEach(function (espId) {
-            if(!res.locals.lopy.esp.contains(espId)) {
-                res.locals.lopy.esp.push(espId);
-            }
-        });
+            res.locals.lopy.save();
 
-        res.locals.lopy.save();
-        
-        // Then send the response
-        let displays = await Display.find({
-            espId: { "$in" : res.locals.parsedData.c}
-        });
+            // Then send the response
+            let displays = await Display.find({
+                espId: { "$in" : res.locals.parsedData.c}
+            });
+
+            displays.forEach(e => {
+                let message = "";
+                if (e.message != null) {
+                    message = e.message;
+                }
+                let data = {
+                    id: e.espId,
+                    mes: message
+                };
+                response.push(data);
+
+                // update last lopy attribute
+                e.lastLopy = req.body.devEUI;
+                e.save();
+            });
+        }
 
         let seq = Number(res.locals.parsedData.s) + 1;
-        let response = [];
-        displays.forEach(e => {
-            let message = "";
-            if (e.message != null) {
-                message = e.message;
-            }
-            let data = {
-                id: e.espId,
-                mes: message
-            };
-            response.push(data);
-
-            // update last lopy attribute
-            e.lastLopy = req.body.devEUI;
-            e.save();
-        });
 
         let devEUI = req.body.devEUI;
         let fport = req.body.fPort;
