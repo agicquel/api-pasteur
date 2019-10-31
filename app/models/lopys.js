@@ -9,7 +9,8 @@ const Lopy = new Schema({
         required: true,
         unique: true
     },
-    status: [LopyStatus]
+    status: [LopyStatus],
+    esp: [String]
 });
 
 module.exports = mongoose.model('Lopy', Lopy);

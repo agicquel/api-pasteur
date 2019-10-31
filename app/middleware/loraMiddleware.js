@@ -66,6 +66,7 @@ exports.loraValidate = function(req, res, next) {
                     }
 
                     lopy.save();
+                    res.locals.lopy = lopy;
                 });
 
                 let buff = Buffer.from(req.body.data, 'base64');

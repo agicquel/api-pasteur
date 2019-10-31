@@ -13,7 +13,7 @@ const DisplayModification = mongoose.model('DisplayModification');
 router.post('/', loraController.loraValidate, async function (req, res) {
     try {
         // Sync messages if needed
-        res.locals.parsedData.esp_not_sync.forEach(function(esp) {
+        res.locals.parsedData.m.forEach(function(esp) {
             Display.findOneAndUpdate(
                 { espId: { "$in" : esp.espid} },
                 {
@@ -22,12 +22,27 @@ router.post('/', loraController.loraValidate, async function (req, res) {
                 }
             );
         });
+
+        res.locals.parsedData.d.forEach(function (espId) {
+            if(res.locals.lopy.esp.contains(espId)) {
+                res.locals.lopy.esp.splice(res.locals.lopy.esp.splice.indexOf(espId), 1);
+            }
+        });
+
+        res.locals.parsedData.c.forEach(function (espId) {
+            if(!res.locals.lopy.esp.contains(espId)) {
+                res.locals.lopy.esp.push(espId);
+            }
+        });
+
+        res.locals.lopy.save();
         
         // Then send the response
         let displays = await Display.find({
-            espId: { "$in" : res.locals.parsedData.esp_subscribed}
+            espId: { "$in" : res.locals.parsedData.c}
         });
 
+        let seq = Number(res.locals.parsedData.s) + 1;
         let response = [];
         displays.forEach(e => {
             let message = "";
@@ -35,8 +50,8 @@ router.post('/', loraController.loraValidate, async function (req, res) {
                 message = e.message;
             }
             let data = {
-                espId: e.espId,
-                message: message
+                id: e.espId,
+                mes: message
             };
             response.push(data);
 
@@ -49,7 +64,7 @@ router.post('/', loraController.loraValidate, async function (req, res) {
         let fport = req.body.fPort;
         let responseStruct = {
             'fPort': fport,
-            'data': new Buffer(JSON.stringify(response)).toString("base64"),
+            'data': new Buffer(JSON.stringify({'s' : seq, 'm' : response})).toString("base64"),
             'devEUI': devEUI
         };
 
