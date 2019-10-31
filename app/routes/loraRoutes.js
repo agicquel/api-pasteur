@@ -27,8 +27,9 @@ router.post('/', loraController.loraValidate, async function (req, res) {
 
         if(res.locals.parsedData.d) {
             res.locals.parsedData.d.forEach(function (espId) {
-                if(res.locals.lopy.esp.contains(espId)) {
-                    res.locals.lopy.esp.splice(res.locals.lopy.esp.splice.indexOf(espId), 1);
+                let index = res.locals.lopy.esp.indexOf(espId);
+                if(index !== -1) {
+                    res.locals.lopy.esp.splice(index, 1);
                 }
             });
         }
@@ -36,7 +37,7 @@ router.post('/', loraController.loraValidate, async function (req, res) {
         let response = [];
         if(res.locals.parsedData.c) {
             res.locals.parsedData.c.forEach(function (espId) {
-                if(!res.locals.lopy.esp.contains(espId)) {
+                if(res.locals.lopy.esp.indexOf(espId) !== -1) {
                     res.locals.lopy.esp.push(espId);
                 }
             });
