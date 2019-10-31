@@ -53,53 +53,7 @@ router.post('/', loraController.loraValidate, async function (req, res) {
             'devEUI': devEUI
         };
 
-        // save Lopy status
-        Lopy.findOne({ mac: { "$in" : req.body.devEUI} }, function(err, lopy) {
-            if (err || !lopy) {
-                lopy = new Lopy({mac: req.body.devEUI});
-            }
-
-            let status = new LopyStatus({
-                mac: lopy.mac,
-                devEUI: req.body.devEUI,
-                appEUI: req.body.appEUI ,
-                fPort: req.body.fPort ,
-                gatewayCount: req.body.gatewayCount,
-                rssi: req.body.rssi,
-                loRaSNR: req.body.loRaSNR,
-                frequency: req.body.frequency,
-                dataRate: new DataRate(req.body.dataRate),
-                devAddr: req.body.devAddr,
-                fCntUp: req.body.fCntUp,
-                time: req.body.time,
-            });
-
-            req.body.gateways.forEach(g => {
-                status.gateways.push(new Gateway({
-                    mac: g.mac,
-                    time: g.time,
-                    timestamp: g.timestamp,
-                    frequency: g.frequency,
-                    channel: g.channel,
-                    rfChain: g.rfChain,
-                    crcStatus: g.crcStatus,
-                    codeRate: g.codeRate,
-                    rssi: g.rssi,
-                    loRaSNR: g.loRaSNR,
-                    size: g.size,
-                    dataRate: new DataRate(g.dataRate)
-                }));
-            });
-
-            lopy.status.push(status);
-
-            // Keep only the 100st status
-            while(lopy.status.length > 100) {
-                lopy.status.shift();
-            }
-            
-            lopy.save();
-        });
+        logger.debug("lopy response : " + JSON.stringify(responseStruct));
 
         res.end(JSON.stringify(responseStruct));
         res.end();

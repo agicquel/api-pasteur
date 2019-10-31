@@ -2,6 +2,11 @@ const auth = require('./authUserMiddleware');
 const log4js = require('log4js');
 const logger = log4js.getLogger('console');
 const util = require('util');
+const mongoose = require('mongoose');
+const Lopy = mongoose.model('Lopy');
+const LopyStatus = mongoose.model('LopyStatus');
+const DataRate = mongoose.model('DataRate');
+const Gateway = mongoose.model('Gateway');
 
 exports.loraValidate = function(req, res, next) {
     auth.validateUser(req, res, function() {
@@ -15,17 +20,58 @@ exports.loraValidate = function(req, res, next) {
             } else {
                 logger.debug("req = " + util.inspect(req.body, {showHidden: false, depth: null}));
 
-                let buff = Buffer.from(req.body.data, 'base64');
-                let lopy_req = buff.toString('ascii');
-                const lopy_req_json = JSON.parse(lopy_req);
+                // save Lopy status
+                Lopy.findOne({ mac: { "$in" : req.body.devEUI} }, function(err, lopy) {
+                    if (err || !lopy) {
+                        lopy = new Lopy({mac: req.body.devEUI});
+                    }
 
-                if(typeof lopy_req_json.esp_subscribed === 'undefined' || typeof lopy_req_json.esp_not_sync === 'undefined') {
-                    res.status(400).send("Bad parameters");
-                }
-                else {
-                    res.locals.parsedData = lopy_req_json;
-                    next();
-                }
+                    let status = new LopyStatus({
+                        mac: lopy.mac,
+                        devEUI: req.body.devEUI,
+                        appEUI: req.body.appEUI ,
+                        fPort: req.body.fPort ,
+                        gatewayCount: req.body.gatewayCount,
+                        rssi: req.body.rssi,
+                        loRaSNR: req.body.loRaSNR,
+                        frequency: req.body.frequency,
+                        dataRate: new DataRate(req.body.dataRate),
+                        devAddr: req.body.devAddr,
+                        fCntUp: req.body.fCntUp,
+                        time: req.body.time,
+                    });
+
+                    req.body.gateways.forEach(g => {
+                        status.gateways.push(new Gateway({
+                            mac: g.mac,
+                            time: g.time,
+                            timestamp: g.timestamp,
+                            frequency: g.frequency,
+                            channel: g.channel,
+                            rfChain: g.rfChain,
+                            crcStatus: g.crcStatus,
+                            codeRate: g.codeRate,
+                            rssi: g.rssi,
+                            loRaSNR: g.loRaSNR,
+                            size: g.size,
+                            dataRate: new DataRate(g.dataRate)
+                        }));
+                    });
+
+                    lopy.status.push(status);
+
+                    // Keep only the 100st status
+                    while(lopy.status.length > 100) {
+                        lopy.status.shift();
+                    }
+
+                    lopy.save();
+                });
+
+                let buff = Buffer.from(req.body.data, 'base64');
+                let data_buff = buff.toString('ascii');
+                res.locals.parsedData = JSON.parse(data_buff);
+                next();
             }
         }
         catch (error) {
