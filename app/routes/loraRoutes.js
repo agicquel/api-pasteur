@@ -73,7 +73,7 @@ router.post('/', loraController.loraValidate, async function (req, res) {
         res.end(JSON.stringify(responseStruct));
         res.end();
     } catch (error) {
-        console.error(error);
+        logger.debug("erreur processing : " + error);
         res.status(400).send("Error while processing");
     }
 });
