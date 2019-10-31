@@ -65,14 +65,20 @@ exports.loraValidate = function(req, res, next) {
                         lopy.status.shift();
                     }
 
-                    lopy.save();
-                    res.locals.lopy = lopy;
+                    lopy.save(function (err, savedLopy) {
+                        if (err) {
+                            logger.debug("failed to save lopy : " + err);
+                            res.send(err);
+                        }
+                        else {
+                            res.locals.lopy = savedLopy;
+                            let buff = Buffer.from(req.body.data, 'base64');
+                            let data_buff = buff.toString('ascii');
+                            res.locals.parsedData = JSON.parse(data_buff);
+                            next();
+                        }
+                    });
                 });
-
-                let buff = Buffer.from(req.body.data, 'base64');
-                let data_buff = buff.toString('ascii');
-                res.locals.parsedData = JSON.parse(data_buff);
-                next();
             }
         }
         catch (error) {
