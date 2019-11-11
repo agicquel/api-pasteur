@@ -85,6 +85,7 @@ router.post('/', loraController.loraValidate, async function (req, res) {
                 id: e.espId,
                 mes: message
             };
+            logger.debug("send message = " + e.message);
             response.push(data);
         });
 
