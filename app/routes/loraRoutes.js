@@ -73,7 +73,7 @@ router.post('/', loraController.loraValidate, async function (req, res) {
 
         let response = [];
         let displays = await Display.find({
-            espId: {"$in": res.locals.lopy.currentSeq},
+            espId: {"$in": req.body.devEUI},
             lopyMessageSync: false
         });
         displays.forEach(e => {

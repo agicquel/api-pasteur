@@ -18,7 +18,7 @@ exports.loraValidate = function(req, res, next) {
             } else if (!req.body.data) {
                 res.status(400).send("Data missing");
             } else {
-                logger.debug("req = " + util.inspect(req.body, {showHidden: false, depth: null}));
+                //logger.debug("req = " + util.inspect(req.body, {showHidden: false, depth: null}));
 
                 // save Lopy status
                 Lopy.findOne({ mac: { "$in" : req.body.devEUI} }, function(err, lopy) {
