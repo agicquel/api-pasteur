@@ -71,37 +71,41 @@ router.post('/', loraController.loraValidate, async function (req, res) {
             );
         }
 
-        let response = [];
-        let displays = await Display.find({
-            espId: {"$in": req.body.devEUI},
+        Display.find({
+            espId: req.body.devEUI,
             lopyMessageSync: false
-        });
-        displays.forEach(e => {
-            let message = "";
-            if (e.message != null) {
-                message = e.message;
+        }, function (err, displays) {
+            let seq = Number(res.locals.parsedData.s) + 1;
+            let devEUI = req.body.devEUI;
+            let fport = req.body.fPort;
+            let response = [];
+
+            if(!err && displays) {
+                displays.forEach(e => {
+                    let message = "";
+                    if (e.message != null) {
+                        message = e.message;
+                    }
+                    let data = {
+                        id: e.espId,
+                        mes: message
+                    };
+                    logger.debug("send message = " + e.message);
+                    response.push(data);
+                });
+
+                let responseStruct = {
+                    'fPort': fport,
+                    'data': new Buffer(JSON.stringify({'s': seq, 'm': response})).toString("base64"),
+                    'devEUI': devEUI
+                };
+
+                logger.debug("lopy response : " + JSON.stringify(responseStruct));
+
+                res.end(JSON.stringify(responseStruct));
+                res.end();
             }
-            let data = {
-                id: e.espId,
-                mes: message
-            };
-            logger.debug("send message = " + e.message);
-            response.push(data);
         });
-
-        let seq = Number(res.locals.parsedData.s) + 1;
-        let devEUI = req.body.devEUI;
-        let fport = req.body.fPort;
-        let responseStruct = {
-            'fPort': fport,
-            'data': new Buffer(JSON.stringify({'s': seq, 'm': response})).toString("base64"),
-            'devEUI': devEUI
-        };
-
-        logger.debug("lopy response : " + JSON.stringify(responseStruct));
-
-        res.end(JSON.stringify(responseStruct));
-        res.end();
     } catch (error) {
         logger.debug("erreur processing : " + error);
         res.status(400).send("Error while processing");
