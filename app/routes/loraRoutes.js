@@ -13,7 +13,7 @@ const util = require('util');
 
 router.post('/', loraController.loraValidate, async function (req, res) {
     try {
-        logger.debug("res locals = " + util.inspect(res.locals, {showHidden: false, depth: null}));
+        logger.debug("parsed data = " + util.inspect(res.locals.parsedData, {showHidden: false, depth: null}));
 
         if (res.locals.lopy.currentSeq < res.locals.parsedData.s) {
             res.locals.lopy.currentSeq = res.locals.parsedData.s;
