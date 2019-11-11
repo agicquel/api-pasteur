@@ -21,9 +21,6 @@ const DisplaySchema = new Schema({
         dropDups: true
     },
     owners : [ObjectId],
-    lastLopy: {
-        type: String
-    },
     createdAt: {
         type: Date,
         default: Date.now
@@ -33,6 +30,17 @@ const DisplaySchema = new Schema({
         default: Date.now
     },
     history: [DisplayModification],
+    lastLopy: {
+        type: String
+    },
+    lopyMessageSeq: {
+        type: Number,
+        default: 0
+    },
+    lopyMessageSync : {
+        type: Boolean,
+        default: false
+    }
 });
 
 module.exports = mongoose.model('Display', DisplaySchema);

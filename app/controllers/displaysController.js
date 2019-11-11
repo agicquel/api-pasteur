@@ -58,7 +58,12 @@ exports.update = function(req, res) {
         Display.findOneAndUpdate({
             _id: req.params.id,
         }, {
-            $set: req.body,
+            $set:  {
+                name: req.body.name,
+                message: req.body.message,
+                espId: req.body.espId,
+                lopyMessageSync: false
+            },
             $push: { history: new DisplayModification({modifierId:res.locals.userId, modifierType:res.locals.userRole})}
         }, {
             new: true
@@ -74,7 +79,12 @@ exports.update = function(req, res) {
             _id: req.params.id,
             owners: {"$in" : res.locals.userId}
         }, {
-            $set: req.body,
+            $set:  {
+                name: req.body.name,
+                message: req.body.message,
+                espId: req.body.espId,
+                lopyMessageSync: false
+            },
             $push: { history: new DisplayModification({modifierId:res.locals.userId, modifierType:res.locals.userRole})}
         }, {
             new: true

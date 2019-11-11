@@ -12,41 +12,70 @@ const DisplayModification = mongoose.model('DisplayModification');
 
 router.post('/', loraController.loraValidate, async function (req, res) {
     try {
-        // Sync messages if needed
-        if(res.locals.parsedData.m) {
-            res.locals.parsedData.m.forEach(function(esp) {
-                Display.findOneAndUpdate(
-                    { espId: { "$in" : esp.espid} },
-                    {
-                        $set : {"message" : esp.message},
-                        $push: { history : new DisplayModification({modifierId:req.body.devEUI, modifierType:"lopy"})}
-                    }
-                );
-            });
-        }
+        logger.debug("res locals = " + util.inspect(res.locals, {showHidden: false, depth: null}));
 
-        if(res.locals.parsedData.d) {
-            res.locals.parsedData.d.forEach(function (espId) {
-                let index = res.locals.lopy.esp.indexOf(espId);
-                if(index !== -1) {
-                    res.locals.lopy.esp.splice(index, 1);
-                }
-            });
+        if (res.locals.lopy.currentSeq < res.locals.parsedData.s) {
+            res.locals.lopy.currentSeq = res.locals.parsedData.s;
+            res.locals.lopy.save();
+
+            // Sync messages if needed
+            if (res.locals.parsedData.m) {
+                res.locals.parsedData.m.forEach(function (esp) {
+                    Display.findOneAndUpdate(
+                        {espId: {"$in": esp.id}},
+                        {
+                            $set: {
+                                message: esp.mes,
+                                lopyMessageSync: true,
+                                lopyMessageSeq : res.locals.parsedData.s
+                            },
+                            $push: {
+                                history: new DisplayModification({
+                                    modifierId: req.body.devEUI,
+                                    modifierType: "lopy"
+                                })
+                            }
+                        }
+                    );
+                });
+            }
+
+            if (res.locals.parsedData.d) {
+                res.locals.parsedData.d.forEach(function (espId) {
+                    Display.findOneAndUpdate({espId: espId}, {
+                        $set: {
+                            lastLopy: "null",
+                            lopyMessageSync: false,
+                            lopyMessageSeq : 0
+                        }
+                    });
+                });
+            }
+
+            if (res.locals.parsedData.c) {
+                res.locals.parsedData.c.forEach(function (espId) {
+                    Display.findOneAndUpdate({espId: espId}, {
+                        $set: {
+                            lastLopy: req.body.devEUI,
+                            lopyMessageSync: false,
+                            lopyMessageSeq : res.locals.parsedData.s
+                        }
+                    });
+                });
+            }
+
+            await Display.updateMany(
+                {lastLopy: req.body.devEUI},
+                {lopyMessageSync: true, lopyMessageSeq: res.locals.parsedData.s}
+            );
         }
 
         let response = [];
-        if(res.locals.parsedData.c) {
-            res.locals.parsedData.c.forEach(function (espId) {
-                if(res.locals.lopy.esp.indexOf(espId) !== -1) {
-                    res.locals.lopy.esp.push(espId);
-                }
-            });
-
-            res.locals.lopy.save();
-
+        if (res.locals.parsedData.c) {
             // Then send the response
             let displays = await Display.find({
-                espId: { "$in" : res.locals.parsedData.c}
+                espId: {"$in": res.locals.parsedData.c},
+                lopyMessageSync: false
             });
 
             displays.forEach(e => {
@@ -61,8 +90,8 @@ router.post('/', loraController.loraValidate, async function (req, res) {
                 response.push(data);
 
                 // update last lopy attribute
-                e.lastLopy = req.body.devEUI;
-                e.save();
+                //e.lastLopy = req.body.devEUI;
+                //e.save();
             });
         }
 
@@ -72,7 +101,7 @@ router.post('/', loraController.loraValidate, async function (req, res) {
         let fport = req.body.fPort;
         let responseStruct = {
             'fPort': fport,
-            'data': new Buffer(JSON.stringify({'s' : seq, 'm' : response})).toString("base64"),
+            'data': new Buffer(JSON.stringify({'s': seq, 'm': response})).toString("base64"),
             'devEUI': devEUI
         };
 
