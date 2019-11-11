@@ -75,7 +75,7 @@ router.post('/', loraController.loraValidate, async function (req, res) {
         }
 
         Display.find({
-            espId: req.body.devEUI,
+            lastLopy: req.body.devEUI,
             lopyMessageSync: false
         }, function (err, displays) {
             let devEUI = req.body.devEUI;
