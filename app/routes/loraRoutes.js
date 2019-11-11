@@ -80,6 +80,15 @@ router.post('/', loraController.loraValidate, async function (req, res) {
             let fport = req.body.fPort;
             let response = [];
 
+            if(err) {
+                logger.debug("err in Display.find = " + err);
+            }
+
+            if(displays) {
+                logger.debug("displays found = " + util.inspect(displays, {showHidden: false, depth: null}));
+
+            }
+
             if(!err && displays) {
                 displays.forEach(e => {
                     let message = "";
