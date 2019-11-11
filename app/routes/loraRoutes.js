@@ -9,6 +9,7 @@ const loraController = require('../middleware/loraMiddleware');
 const log4js = require('log4js');
 const logger = log4js.getLogger('console');
 const DisplayModification = mongoose.model('DisplayModification');
+const util = require('util');
 
 router.post('/', loraController.loraValidate, async function (req, res) {
     try {
