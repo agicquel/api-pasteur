@@ -72,32 +72,23 @@ router.post('/', loraController.loraValidate, async function (req, res) {
         }
 
         let response = [];
-        if (res.locals.parsedData.c) {
-            // Then send the response
-            let displays = await Display.find({
-                espId: {"$in": res.locals.parsedData.c},
-                lopyMessageSync: false
-            });
-
-            displays.forEach(e => {
-                let message = "";
-                if (e.message != null) {
-                    message = e.message;
-                }
-                let data = {
-                    id: e.espId,
-                    mes: message
-                };
-                response.push(data);
-
-                // update last lopy attribute
-                //e.lastLopy = req.body.devEUI;
-                //e.save();
-            });
-        }
+        let displays = await Display.find({
+            espId: {"$in": res.locals.lopy.currentSeq},
+            lopyMessageSync: false
+        });
+        displays.forEach(e => {
+            let message = "";
+            if (e.message != null) {
+                message = e.message;
+            }
+            let data = {
+                id: e.espId,
+                mes: message
+            };
+            response.push(data);
+        });
 
         let seq = Number(res.locals.parsedData.s) + 1;
-
         let devEUI = req.body.devEUI;
         let fport = req.body.fPort;
         let responseStruct = {
