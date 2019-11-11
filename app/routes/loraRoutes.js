@@ -16,7 +16,7 @@ router.post('/', loraController.loraValidate, async function (req, res) {
         logger.debug("parsed data = " + util.inspect(res.locals.parsedData, {showHidden: false, depth: null}));
 
         if (res.locals.lopy.currentSeq < res.locals.parsedData.s) {
-            res.locals.lopy.currentSeq = res.locals.parsedData.s;
+            res.locals.lopy.currentSeq = res.locals.parsedData.s + 1;
             res.locals.lopy.save();
 
             // Sync messages if needed
@@ -28,7 +28,7 @@ router.post('/', loraController.loraValidate, async function (req, res) {
                             $set: {
                                 message: esp.mes,
                                 lopyMessageSync: true,
-                                lopyMessageSeq : res.locals.parsedData.s
+                                lopyMessageSeq: res.locals.lopy.currentSeq
                             },
                             $push: {
                                 history: new DisplayModification({
@@ -47,7 +47,7 @@ router.post('/', loraController.loraValidate, async function (req, res) {
                         $set: {
                             lastLopy: "null",
                             lopyMessageSync: false,
-                            lopyMessageSeq : 0
+                            lopyMessageSeq: 0
                         }
                     });
                 });
@@ -59,37 +59,39 @@ router.post('/', loraController.loraValidate, async function (req, res) {
                         $set: {
                             lastLopy: req.body.devEUI,
                             lopyMessageSync: false,
-                            lopyMessageSeq : res.locals.parsedData.s
+                            lopyMessageSeq: res.locals.lopy.currentSeq
                         }
                     });
                 });
             }
 
-            await Display.updateMany(
-                {lastLopy: req.body.devEUI},
-                {lopyMessageSync: true, lopyMessageSeq: res.locals.parsedData.s}
-            );
+            await Display.updateMany({
+                lastLopy: req.body.devEUI,
+                lopyMessageSeq: {$lt: res.locals.parsedData.s}
+            }, {
+                lopyMessageSync: true,
+                lopyMessageSeq: res.locals.lopy.currentSeq
+            });
         }
 
         Display.find({
             espId: req.body.devEUI,
             lopyMessageSync: false
         }, function (err, displays) {
-            let seq = Number(res.locals.parsedData.s) + 1;
             let devEUI = req.body.devEUI;
             let fport = req.body.fPort;
             let response = [];
 
-            if(err) {
+            if (err) {
                 logger.debug("err in Display.find = " + err);
             }
 
-            if(displays) {
+            if (displays) {
                 logger.debug("displays found = " + util.inspect(displays, {showHidden: false, depth: null}));
 
             }
 
-            if(!err && displays) {
+            if (!err && displays) {
                 displays.forEach(e => {
                     let message = "";
                     if (e.message != null) {
@@ -105,7 +107,10 @@ router.post('/', loraController.loraValidate, async function (req, res) {
 
                 let responseStruct = {
                     'fPort': fport,
-                    'data': new Buffer(JSON.stringify({'s': seq, 'm': response})).toString("base64"),
+                    'data': new Buffer(JSON.stringify({
+                        's': res.locals.lopy.currentSeq,
+                        'm': response
+                    })).toString("base64"),
                     'devEUI': devEUI
                 };
 
