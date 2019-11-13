@@ -69,7 +69,7 @@ async function handleRequest(req, res) {
 
         await Display.updateMany({
             lastLopy: req.body.devEUI,
-            lopyMessageSeq: {$lt: res.locals.parsedData.s}
+            lopyMessageSeq: (res.locals.parsedData.s - 1)
         }, {
             lopyMessageSync: true,
             lopyMessageSeq: res.locals.lopy.currentSeq
@@ -87,16 +87,18 @@ async function handleRequest(req, res) {
 
         let response = [];
         if (!err && displays) {
-            displays.forEach(e => {
+            displays.forEach(d => {
                 let message = "";
-                if (e.message != null) {
-                    message = e.message;
+                if (d.message != null) {
+                    message = d.message;
                 }
                 let data = {
-                    id: e.espId,
+                    id: d.espId,
                     mes: message
                 };
-                logger.debug("send message = " + e.message);
+                logger.debug("send message = " + d.message);
+                d.lopyMessageSeq = res.locals.lopy.currentSeq;
+                d.save();
                 response.push(data);
             });
 
