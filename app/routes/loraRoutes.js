@@ -17,7 +17,7 @@ async function handleRequest(req, res) {
         res.locals.lopy.save();
 
         // Sync messages if needed
-        if (res.locals.parsedData.m) {
+        if (res.locals.parsedData.hasOwnProperty("m")) {
             res.locals.parsedData.m.forEach(function (esp) {
                 Display.findOneAndUpdate(
                     {espId: {"$in": esp.id}},
@@ -38,8 +38,9 @@ async function handleRequest(req, res) {
             });
         }
 
-        if (res.locals.parsedData.d) {
+        if (res.locals.parsedData.hasOwnProperty("d")) {
             res.locals.parsedData.d.forEach(function (espId) {
+                logger.debug("device disconnected = " + espId);
                 Display.findOneAndUpdate({espId: espId}, {
                     $set: {
                         lastLopy: "null",
@@ -50,8 +51,9 @@ async function handleRequest(req, res) {
             });
         }
 
-        if (res.locals.parsedData.c) {
+        if (res.locals.parsedData.hasOwnProperty("c")) {
             res.locals.parsedData.c.forEach(function (espId) {
+                logger.debug("device connected = " + espId);
                 Display.findOneAndUpdate({espId: espId}, {
                     $set: {
                         lastLopy: req.body.devEUI,
@@ -130,7 +132,7 @@ async function handleRequestReset(req, res) {
             });
         }
     });
-    
+
     let responseStruct = {
         'fPort': req.body.fPort,
         'data': new Buffer(JSON.stringify({
