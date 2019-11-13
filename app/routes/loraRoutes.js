@@ -117,20 +117,20 @@ async function handleRequest(req, res) {
 }
 
 async function handleRequestReset(req, res) {
-    Display.updateMany({lastLopy: req.body.devEUI}, {
-        $set: {
-            lastLopy: "null",
-            lopyMessageSync: false,
-            lopyMessageSeq: 0
+    res.locals.lopy.currentSeq = 0;
+    res.locals.lopy.save();
+
+    Display.find({lastLopy: req.body.devEUI}, function (err, displays) {
+        if(!err && displays) {
+            displays.forEach(d => {
+                d.lastLopy = "null";
+                d.lopyMessageSync = false;
+                d.lopyMessageSeq = 0;
+                d.save();
+            });
         }
     });
-
-    Lopy.findOneAndUpdate({ mac: { "$in" : req.body.devEUI}}, {
-        $set: {
-            currentSeq: 0
-        }
-    });
-
+    
     let responseStruct = {
         'fPort': req.body.fPort,
         'data': new Buffer(JSON.stringify({

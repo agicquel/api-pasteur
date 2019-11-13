@@ -64,7 +64,6 @@ log4js.configure({
   });
 
 let logger = log4js.getLogger('console');
-logger.debug("testtesttest");
 
 //import routes
 let displaysRoute = require('./app/routes/displaysRoutes');
