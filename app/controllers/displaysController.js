@@ -1,6 +1,7 @@
 const mongoose = require('mongoose');
 const Display = mongoose.model('Display');
 const DisplayModification = mongoose.model('DisplayModification');
+const Lopy = mongoose.model('Lopy');
 
 exports.getAll = function(req, res) {
     if(res.locals.userRole == "admin") {
@@ -54,47 +55,39 @@ exports.get = function(req, res) {
 };
 
 exports.update = function(req, res) {
+    let filter = {};
     if(res.locals.userRole == "admin") {
-        Display.findOneAndUpdate({
+        filter = {
             _id: req.params.id,
-        }, {
-            $set:  {
-                name: req.body.name,
-                message: req.body.message,
-                espId: req.body.espId,
-                lopyMessageSync: false
-            },
-            $push: { history: new DisplayModification({modifierId:res.locals.userId, modifierType:res.locals.userRole})}
-        }, {
-            new: true
-        }, function(err, display) {
-            if (err)
-                res.send(err);
-            else
-                res.json(display);
-        });
+        }
     }
     else if(res.locals.userRole == "user") {
-        Display.findOneAndUpdate({
+        filter = {
             _id: req.params.id,
             owners: {"$in" : res.locals.userId}
-        }, {
-            $set:  {
-                name: req.body.name,
-                message: req.body.message,
-                espId: req.body.espId,
-                lopyMessageSync: false
-            },
-            $push: { history: new DisplayModification({modifierId:res.locals.userId, modifierType:res.locals.userRole})}
-        }, {
-            new: true
-        }, function(err, display) {
-            if (err)
-                res.send(err);
-            else
-                res.json(display);
-        });
+        }
     }
+    Display.findOne(filter, function (err, display) {
+        if(err) {
+            res.send(err);
+        }
+        if(display) {
+            display.name = req.body.name;
+            display.message = req.body.message;
+            display.espId = req.body.espId;
+            display.lopyMessageSync = req.body.espId;
+            display.history.append(new DisplayModification({modifierId:res.locals.userId, modifierType:res.locals.userRole}));
+            if(typeof display.lastLopy != "undefined") {
+                Lopy.find({mac: display.lastLopy}, function (err, lopy) {
+                    if(!err && lopy) {
+                        display.lopyMessageSeq = lopy.currentSeq;
+                    }
+                });
+            }
+            display.save();
+            res.json(display);
+        }
+    });
 };
 
 exports.delete = function(req, res) {

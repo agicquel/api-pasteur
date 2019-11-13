@@ -85,10 +85,6 @@ async function handleRequest(req, res) {
             logger.debug("err in Display.find = " + err);
         }
 
-        if (displays) {
-            logger.debug("displays found = " + util.inspect(displays, {showHidden: false, depth: null}));
-        }
-
         let response = [];
         if (!err && displays) {
             displays.forEach(e => {
