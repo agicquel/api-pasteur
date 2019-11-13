@@ -11,116 +11,146 @@ const logger = log4js.getLogger('console');
 const DisplayModification = mongoose.model('DisplayModification');
 const util = require('util');
 
-router.post('/', loraController.loraValidate, async function (req, res) {
-    try {
-        logger.debug("parsed data = " + util.inspect(res.locals.parsedData, {showHidden: false, depth: null}));
+async function handleRequest(req, res) {
+    if (res.locals.lopy.currentSeq < res.locals.parsedData.s) {
+        res.locals.lopy.currentSeq = res.locals.parsedData.s + 1;
+        res.locals.lopy.save();
 
-        if (res.locals.lopy.currentSeq < res.locals.parsedData.s) {
-            res.locals.lopy.currentSeq = res.locals.parsedData.s + 1;
-            res.locals.lopy.save();
-
-            // Sync messages if needed
-            if (res.locals.parsedData.m) {
-                res.locals.parsedData.m.forEach(function (esp) {
-                    Display.findOneAndUpdate(
-                        {espId: {"$in": esp.id}},
-                        {
-                            $set: {
-                                message: esp.mes,
-                                lopyMessageSync: true,
-                                lopyMessageSeq: res.locals.lopy.currentSeq
-                            },
-                            $push: {
-                                history: new DisplayModification({
-                                    modifierId: req.body.devEUI,
-                                    modifierType: "lopy"
-                                })
-                            }
-                        }
-                    );
-                });
-            }
-
-            if (res.locals.parsedData.d) {
-                res.locals.parsedData.d.forEach(function (espId) {
-                    Display.findOneAndUpdate({espId: espId}, {
+        // Sync messages if needed
+        if (res.locals.parsedData.m) {
+            res.locals.parsedData.m.forEach(function (esp) {
+                Display.findOneAndUpdate(
+                    {espId: {"$in": esp.id}},
+                    {
                         $set: {
-                            lastLopy: "null",
-                            lopyMessageSync: false,
-                            lopyMessageSeq: 0
-                        }
-                    });
-                });
-            }
-
-            if (res.locals.parsedData.c) {
-                res.locals.parsedData.c.forEach(function (espId) {
-                    Display.findOneAndUpdate({espId: espId}, {
-                        $set: {
-                            lastLopy: req.body.devEUI,
-                            lopyMessageSync: false,
+                            message: esp.mes,
+                            lopyMessageSync: true,
                             lopyMessageSeq: res.locals.lopy.currentSeq
+                        },
+                        $push: {
+                            history: new DisplayModification({
+                                modifierId: req.body.devEUI,
+                                modifierType: "lopy"
+                            })
                         }
-                    });
-                });
-            }
-
-            await Display.updateMany({
-                lastLopy: req.body.devEUI,
-                lopyMessageSeq: {$lt: res.locals.parsedData.s}
-            }, {
-                lopyMessageSync: true,
-                lopyMessageSeq: res.locals.lopy.currentSeq
+                    }
+                );
             });
         }
 
-        Display.find({
-            lastLopy: req.body.devEUI,
-            lopyMessageSync: false
-        }, function (err, displays) {
-            let devEUI = req.body.devEUI;
-            let fport = req.body.fPort;
-            let response = [];
-
-            if (err) {
-                logger.debug("err in Display.find = " + err);
-            }
-
-            if (displays) {
-                logger.debug("displays found = " + util.inspect(displays, {showHidden: false, depth: null}));
-
-            }
-
-            if (!err && displays) {
-                displays.forEach(e => {
-                    let message = "";
-                    if (e.message != null) {
-                        message = e.message;
+        if (res.locals.parsedData.d) {
+            res.locals.parsedData.d.forEach(function (espId) {
+                Display.findOneAndUpdate({espId: espId}, {
+                    $set: {
+                        lastLopy: "null",
+                        lopyMessageSync: false,
+                        lopyMessageSeq: 0
                     }
-                    let data = {
-                        id: e.espId,
-                        mes: message
-                    };
-                    logger.debug("send message = " + e.message);
-                    response.push(data);
                 });
+            });
+        }
 
-                let responseStruct = {
-                    'fPort': fport,
-                    'data': new Buffer(JSON.stringify({
-                        's': res.locals.lopy.currentSeq,
-                        'm': response
-                    })).toString("base64"),
-                    'devEUI': devEUI
-                };
+        if (res.locals.parsedData.c) {
+            res.locals.parsedData.c.forEach(function (espId) {
+                Display.findOneAndUpdate({espId: espId}, {
+                    $set: {
+                        lastLopy: req.body.devEUI,
+                        lopyMessageSync: false,
+                        lopyMessageSeq: res.locals.lopy.currentSeq
+                    }
+                });
+            });
+        }
 
-                logger.debug("lopy response : " + JSON.stringify(responseStruct));
-
-                res.end(JSON.stringify(responseStruct));
-                res.end();
-            }
+        await Display.updateMany({
+            lastLopy: req.body.devEUI,
+            lopyMessageSeq: {$lt: res.locals.parsedData.s}
+        }, {
+            lopyMessageSync: true,
+            lopyMessageSeq: res.locals.lopy.currentSeq
         });
-    } catch (error) {
+    }
+
+    Display.find({
+        lastLopy: req.body.devEUI,
+        lopyMessageSync: false
+    }, function (err, displays) {
+
+        if (err) {
+            logger.debug("err in Display.find = " + err);
+        }
+
+        if (displays) {
+            logger.debug("displays found = " + util.inspect(displays, {showHidden: false, depth: null}));
+        }
+
+        let response = [];
+        if (!err && displays) {
+            displays.forEach(e => {
+                let message = "";
+                if (e.message != null) {
+                    message = e.message;
+                }
+                let data = {
+                    id: e.espId,
+                    mes: message
+                };
+                logger.debug("send message = " + e.message);
+                response.push(data);
+            });
+
+            let responseStruct = {
+                'fPort': req.body.fPort,
+                'data': new Buffer(JSON.stringify({
+                    's': res.locals.lopy.currentSeq,
+                    'm': response
+                })).toString("base64"),
+                'devEUI': req.body.devEUI
+            };
+
+            logger.debug("lopy response : " + JSON.stringify(responseStruct));
+
+            res.end(JSON.stringify(responseStruct));
+            res.end();
+        }
+    });
+}
+
+async function handleRequestReset(req, res) {
+    Display.updateMany({lastLopy: req.body.devEUI}, {
+        $set: {
+            lastLopy: "null",
+            lopyMessageSync: false,
+            lopyMessageSeq: 0
+        }
+    });
+
+    let responseStruct = {
+        'fPort': req.body.fPort,
+        'data': new Buffer(JSON.stringify({
+            's': 0
+        })).toString("base64"),
+        'devEUI': req.body.devEUI
+    };
+
+    logger.debug("lopy response : " + JSON.stringify(responseStruct));
+    res.end(JSON.stringify(responseStruct));
+    res.end();
+}
+
+router.post('/', loraController.loraValidate, async function (req, res) {
+    try {
+        logger.debug("parsed data = " + util.inspect(res.locals.parsedData, {showHidden: false, depth: null}));
+        if (res.locals.parsedData.s === 0) {
+            logger.debug("call handleRequestReset");
+            await handleRequestReset(req, res);
+        }
+        else {
+            logger.debug("call handleRequest");
+            await handleRequest(req, res);
+        }
+
+        } catch (error) {
         logger.debug("erreur processing : " + error);
         res.status(400).send("Error while processing");
     }
