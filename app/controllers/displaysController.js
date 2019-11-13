@@ -54,7 +54,7 @@ exports.get = function(req, res) {
     });
 };
 
-exports.update = function(req, res) {
+/*exports.update = function(req, res) {
     let filter = {};
     if(res.locals.userRole == "admin") {
         filter = {
@@ -89,6 +89,60 @@ exports.update = function(req, res) {
         }
     });
 };
+*/
+
+exports.update = function(req, res) {
+    if (res.locals.userRole == "admin") {
+        Display.findOneAndUpdate({
+            _id: req.params.id,
+        }, {
+            $set: {
+                name: req.body.name,
+                message: req.body.message,
+                espId: req.body.espId,
+                lopyMessageSync: false
+            },
+            $push: {
+                history: new DisplayModification({
+                    modifierId: res.locals.userId,
+                    modifierType: res.locals.userRole
+                })
+            }
+        }, {
+            new: true
+        }, function (err, display) {
+            if (err)
+                res.send(err);
+            else
+                res.json(display);
+        });
+    } else if (res.locals.userRole == "user") {
+        Display.findOneAndUpdate({
+            _id: req.params.id,
+            owners: {"$in": res.locals.userId}
+        }, {
+            $set: {
+                name: req.body.name,
+                message: req.body.message,
+                espId: req.body.espId,
+                lopyMessageSync: false
+            },
+            $push: {
+                history: new DisplayModification({
+                    modifierId: res.locals.userId,
+                    modifierType: res.locals.userRole
+                })
+            }
+        }, {
+            new: true
+        }, function (err, display) {
+            if (err)
+                res.send(err);
+            else
+                res.json(display);
+        });
+    }
+}
 
 exports.delete = function(req, res) {
     if(res.locals.userRole == "admin") {
