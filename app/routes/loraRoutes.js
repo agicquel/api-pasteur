@@ -104,12 +104,22 @@ async function handleRequest(req, res) {
                 response.push(data);
             });
 
-            let responseStruct = {
-                'fPort': req.body.fPort,
-                'data': new Buffer(JSON.stringify({
+            let data = {};
+            if(response.length > 0) {
+                data = {
                     's': res.locals.lopy.currentSeq,
                     'm': response
-                })).toString("base64"),
+                };
+            }
+            else {
+                data = {
+                    's': res.locals.lopy.currentSeq
+                };
+            }
+
+            let responseStruct = {
+                'fPort': req.body.fPort,
+                'data': new Buffer(JSON.stringify(data)).toString("base64"),
                 'devEUI': req.body.devEUI
             };
 
