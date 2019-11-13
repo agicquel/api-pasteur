@@ -18,7 +18,7 @@ async function handleRequest(req, res) {
 
         // Sync messages if needed
         if (res.locals.parsedData.hasOwnProperty("m")) {
-            res.locals.parsedData.m.forEach(function (esp) {
+            await res.locals.parsedData.m.forEach(function (esp) {
                 Display.findOneAndUpdate(
                     {espId: {"$in": esp.id}},
                     {
@@ -39,26 +39,29 @@ async function handleRequest(req, res) {
         }
 
         if (res.locals.parsedData.hasOwnProperty("d")) {
-            res.locals.parsedData.d.forEach(function (espId) {
+            await res.locals.parsedData.d.forEach(function (espId) {
                 logger.debug("device disconnected = " + espId);
-                Display.findOneAndUpdate({espId: espId}, {
-                    $set: {
-                        lastLopy: "null",
-                        lopyMessageSync: false,
-                        lopyMessageSeq: 0
+
+                Display.findOne({espId: espId}, function (err, display) {
+                    if(!err && display) {
+                        display.lastLopy = "null";
+                        display.lopyMessageSync = false;
+                        display.lopyMessageSeq = 0;
+                        display.save();
                     }
                 });
             });
         }
 
         if (res.locals.parsedData.hasOwnProperty("c")) {
-            res.locals.parsedData.c.forEach(function (espId) {
+            await res.locals.parsedData.c.forEach(function (espId) {
                 logger.debug("device connected = " + espId);
-                Display.findOneAndUpdate({espId: espId}, {
-                    $set: {
-                        lastLopy: req.body.devEUI,
-                        lopyMessageSync: false,
-                        lopyMessageSeq: res.locals.lopy.currentSeq
+                Display.findOne({espId: espId}, function (err, display) {
+                    if(!err && display) {
+                        display.lastLopy = req.body.devEUI;
+                        display.lopyMessageSync = false;
+                        display.lopyMessageSeq = res.locals.lopy.currentSeq;
+                        display.save();
                     }
                 });
             });
