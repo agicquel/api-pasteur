@@ -13,7 +13,7 @@ const util = require('util');
 
 async function handleRequest(req, res) {
     if (res.locals.lopy.currentSeq < res.locals.parsedData.s) {
-        res.locals.lopy.currentSeq = res.locals.parsedData.s + 1;
+        res.locals.lopy.currentSeq = res.locals.parsedData.s;
         res.locals.lopy.save();
 
         // Sync messages if needed
@@ -122,6 +122,12 @@ async function handleRequestReset(req, res) {
             lastLopy: "null",
             lopyMessageSync: false,
             lopyMessageSeq: 0
+        }
+    });
+
+    Lopy.findOneAndUpdate({ mac: { "$in" : req.body.devEUI}}, {
+        $set: {
+            currentSeq: 0
         }
     });
 
