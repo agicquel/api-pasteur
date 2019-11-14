@@ -77,15 +77,13 @@ async function handleRequest(req, res) {
             logger.debug("err in Display.find = " + err);
         }
 
-        if(displays.length === 0) {
-            Display.updateMany({
-                lastLopy: req.body.devEUI,
-                lopyMessageSeq: (res.locals.parsedData.s - 1)
-            }, {
-                lopyMessageSync: true,
-                lopyMessageSeq: res.locals.lopy.currentSeq
-            });
-        }
+        Display.updateMany({
+            lastLopy: req.body.devEUI,
+            lopyMessageSeq: (res.locals.parsedData.s - 1)
+        }, {
+            lopyMessageSync: true,
+            lopyMessageSeq: res.locals.lopy.currentSeq
+        });
 
         let response = [];
         if (!err && displays) {
