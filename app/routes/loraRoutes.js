@@ -97,8 +97,7 @@ async function handleRequest(req, res) {
                     mes: message
                 };
                 logger.debug("send message = " + d.message);
-                d.lopyMessageSeq = res.locals.lopy.currentSeq;
-                d.save();
+                Display.findOneAndUpdate({espId: d.espId}, {$set:{lopyMessageSeq : res.locals.lopy.currentSeq}});
                 response.push(data);
             });
 
