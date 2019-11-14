@@ -66,14 +66,6 @@ async function handleRequest(req, res) {
                 });
             });
         }
-
-        await Display.updateMany({
-            lastLopy: req.body.devEUI,
-            lopyMessageSeq: (res.locals.parsedData.s - 1)
-        }, {
-            lopyMessageSync: true,
-            lopyMessageSeq: res.locals.lopy.currentSeq
-        });
     }
 
     Display.find({
@@ -83,6 +75,16 @@ async function handleRequest(req, res) {
 
         if (err) {
             logger.debug("err in Display.find = " + err);
+        }
+
+        if(displays.length === 0) {
+            Display.updateMany({
+                lastLopy: req.body.devEUI,
+                lopyMessageSeq: (res.locals.parsedData.s - 1)
+            }, {
+                lopyMessageSync: true,
+                lopyMessageSeq: res.locals.lopy.currentSeq
+            });
         }
 
         let response = [];
