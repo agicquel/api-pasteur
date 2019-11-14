@@ -77,28 +77,37 @@ async function handleRequest(req, res) {
             logger.debug("err in Display.find = " + err);
         }
 
-        Display.updateMany({
+        /*Display.updateMany({
             lastLopy: req.body.devEUI,
             lopyMessageSeq: (res.locals.parsedData.s - 1)
         }, {
             lopyMessageSync: true,
             lopyMessageSeq: res.locals.lopy.currentSeq
-        });
+        });*/
 
         let response = [];
         if (!err && displays) {
             displays.forEach(d => {
-                let message = "";
-                if (d.message != null) {
-                    message = d.message;
+                if(d.lopyMessageSeq === (res.locals.parsedData.s - 1)) {
+                    d.lopyMessageSeq = res.locals.parsedData.s;
+                    d.lopyMessageSync = true;
                 }
-                let data = {
-                    id: d.espId,
-                    mes: message
-                };
-                logger.debug("send message = " + d.message);
-                Display.findOneAndUpdate({espId: d.espId}, {$set:{lopyMessageSeq : res.locals.lopy.currentSeq}});
-                response.push(data);
+                else {
+                    let message = "";
+                    if (d.message != null) {
+                        message = d.message;
+                    }
+                    let data = {
+                        id: d.espId,
+                        mes: message
+                    };
+                    d.lopyMessageSeq = res.locals.lopy.currentSeq;
+                    logger.debug("send message = " + d.message);
+                    response.push(data);
+                }
+                d.save();
+
+                //Display.findOneAndUpdate({espId: d.espId}, {$set:{lopyMessageSeq : res.locals.lopy.currentSeq}});
             });
 
             let data = {};
