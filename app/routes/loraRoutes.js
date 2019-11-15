@@ -80,7 +80,7 @@ async function handleRequest(req, res) {
         let response = [];
         if (!err && displays) {
             displays.forEach(d => {
-                if(d.lopyMessageSeq === res.locals.lopy.currentSeq) {
+                if(d.lopyMessageSeq == res.locals.lopy.currentSeq) {
                     d.lopyMessageSync = true
                 }
                 else {
@@ -92,7 +92,7 @@ async function handleRequest(req, res) {
                         id: d.espId,
                         mes: message
                     };
-                    if(d.lopyMessageSeq <= res.locals.lopy.currentSeq) {
+                    if(d.lopyMessageSeq < res.locals.lopy.currentSeq) {
                         d.lopyMessageSeq = res.locals.lopy.currentSeq + 2;
                     }
                     logger.debug("send message = " + d.message);
