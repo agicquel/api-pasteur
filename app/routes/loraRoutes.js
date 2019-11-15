@@ -46,7 +46,7 @@ async function handleRequest(req, res) {
                     if(!err && display) {
                         display.lastLopy = "null";
                         display.lopyMessageSync = false;
-                        display.lopyMessageSeq = 0;
+                        display.lopyMessageSeq = -1;
                         display.save();
                     }
                 });
@@ -137,7 +137,7 @@ async function handleRequestReset(req, res) {
             displays.forEach(d => {
                 d.lastLopy = "null";
                 d.lopyMessageSync = false;
-                d.lopyMessageSeq = 0;
+                d.lopyMessageSeq = -1;
                 d.save();
             });
         }
