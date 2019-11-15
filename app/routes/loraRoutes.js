@@ -77,20 +77,11 @@ async function handleRequest(req, res) {
             logger.debug("err in Display.find = " + err);
         }
 
-        /*Display.updateMany({
-            lastLopy: req.body.devEUI,
-            lopyMessageSeq: (res.locals.parsedData.s - 1)
-        }, {
-            lopyMessageSync: true,
-            lopyMessageSeq: res.locals.lopy.currentSeq
-        });*/
-
         let response = [];
         if (!err && displays) {
             displays.forEach(d => {
-                if(d.lopyMessageSeq === (res.locals.parsedData.s - 1)) {
-                    d.lopyMessageSeq = res.locals.parsedData.s;
-                    d.lopyMessageSync = true;
+                if(d.lopyMessageSeq === res.locals.lopy.currentSeq) {
+                    d.lopyMessageSync = true
                 }
                 else {
                     let message = "";
@@ -101,13 +92,13 @@ async function handleRequest(req, res) {
                         id: d.espId,
                         mes: message
                     };
-                    d.lopyMessageSeq = res.locals.lopy.currentSeq;
+                    if(d.lopyMessageSeq <= res.locals.lopy.currentSeq) {
+                        d.lopyMessageSeq = res.locals.lopy.currentSeq + 2;
+                    }
                     logger.debug("send message = " + d.message);
                     response.push(data);
                 }
                 d.save();
-
-                //Display.findOneAndUpdate({espId: d.espId}, {$set:{lopyMessageSeq : res.locals.lopy.currentSeq}});
             });
 
             let data = {};
