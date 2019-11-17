@@ -68,7 +68,7 @@ async function handleRequest(req, res) {
                 logger.debug("device connected = " + espId);
                 Display.findOne({espId: espId}, function (err, display) {
                     if(!err && display) {
-                        display.lastLopy = req.body.devEUI;
+                        display.lastLopy = req.body.devEUI.toString();
                         display.lopyMessageSync = false;
                         display.lopyMessageSeq = res.locals.lopy.currentSeq;
                         display.save();
