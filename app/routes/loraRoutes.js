@@ -90,23 +90,23 @@ async function handleRequest(req, res) {
         let response = [];
         if (!err && displays) {
             displays.forEach(d => {
-                if(d.lopyMessageSeq == res.locals.lopy.currentSeq) {
+                if(res.locals.lopy.currentSeq == d.lopyMessageSeq) {
                     d.lopyMessageSync = true
                 }
+                else if((res.locals.lopy.currentSeq +1) == d.lopyMessageSeq) {
+                        let message = "";
+                        if (d.message != null) {
+                            message = d.message;
+                        }
+                        let data = {
+                            id: d.espId,
+                            mes: message
+                        };
+                        logger.debug("send message = " + d.message);
+                        response.push(data);
+                }
                 else {
-                    let message = "";
-                    if (d.message != null) {
-                        message = d.message;
-                    }
-                    let data = {
-                        id: d.espId,
-                        mes: message
-                    };
-                    if(d.lopyMessageSeq < res.locals.lopy.currentSeq) {
-                        d.lopyMessageSeq = res.locals.lopy.currentSeq + 2;
-                    }
-                    logger.debug("send message = " + d.message);
-                    response.push(data);
+                    d.lopyMessageSeq = res.locals.lopy.currentSeq + 2;
                 }
                 d.save();
             });
