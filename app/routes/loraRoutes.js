@@ -18,6 +18,7 @@ async function handleRequest(req, res) {
 
         // Sync messages if needed
         if (res.locals.parsedData.hasOwnProperty("m")) {
+            logger.debug("has m property");
             await res.locals.parsedData.m.forEach(function (esp) {
                 logger.debug("esp = " + util.inspect(esp, {showHidden: false, depth: null}));
                 Display.find({espId: esp.id}, function (err, display) {
@@ -34,6 +35,7 @@ async function handleRequest(req, res) {
 
                     }
                 });
+            });
                 /*Display.findOneAndUpdate(
                     {espId: esp.id},
                     {
@@ -50,7 +52,8 @@ async function handleRequest(req, res) {
                         }
                     }
                 );*/
-            });
+        } else {
+            logger.debug("has NOT m property");
         }
 
         if (res.locals.parsedData.hasOwnProperty("d")) {
