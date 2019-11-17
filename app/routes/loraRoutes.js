@@ -17,12 +17,13 @@ async function handleRequest(req, res) {
         res.locals.lopy.save();
 
         // Sync messages if needed
-        if (res.locals.parsedData.hasOwnProperty("m")) {
-            logger.debug("has m property");
-            await res.locals.parsedData.m.forEach(function (esp) {
-                logger.debug("esp = " + util.inspect(esp, {showHidden: false, depth: null}));
+        try {
+            if (res.locals.parsedData.hasOwnProperty("m")) {
+                logger.debug("has m property");
+                await res.locals.parsedData.m.forEach(function (esp) {
+                    logger.debug("esp = " + util.inspect(esp, {showHidden: false, depth: null}));
 
-                try {
+
                     Display.find({espId: esp.id}, function (err, display) {
                         logger.debug("display found = " + util.inspect(display, {showHidden: false, depth: null}));
                         logger.debug("err = " + util.inspect(err, {showHidden: false, depth: null}));
@@ -39,11 +40,7 @@ async function handleRequest(req, res) {
 
                         }
                     });
-                }
-                catch(error) {
-                    logger.debug("error = " + error);
-                }
-            });
+                });
                 /*Display.findOneAndUpdate(
                     {espId: esp.id},
                     {
@@ -60,8 +57,12 @@ async function handleRequest(req, res) {
                         }
                     }
                 );*/
-        } else {
-            logger.debug("has NOT m property");
+            } else {
+                logger.debug("has NOT m property");
+            }
+        }
+        catch(error) {
+            logger.debug("error = " + util.inspect(error, {showHidden: false, depth: null}));
         }
 
         if (res.locals.parsedData.hasOwnProperty("d")) {
@@ -194,7 +195,7 @@ router.post('/', loraController.loraValidate, async function (req, res) {
             await handleRequest(req, res);
         }
 
-        } catch (error) {
+    } catch (error) {
         logger.debug("erreur processing : " + error);
         res.status(400).send("Error while processing");
     }
