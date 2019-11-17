@@ -20,7 +20,7 @@ async function handleRequest(req, res) {
         if (res.locals.parsedData.hasOwnProperty("m")) {
             await res.locals.parsedData.m.forEach(function (esp) {
                 Display.findOneAndUpdate(
-                    {espId: {"$in": esp.id}},
+                    {espId: esp.id},
                     {
                         $set: {
                             message: esp.mes,
