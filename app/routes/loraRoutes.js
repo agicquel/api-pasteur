@@ -31,14 +31,14 @@ async function handleRequest(req, res) {
                             logger.debug("err = " + util.inspect(err, {showHidden: false, depth: null}));
                         }
                         else if (typeof display !== 'undefined' && display !== null) {
-                            display.message = esp.mes;
+                            /*display.message = esp.mes;
                             display.lopyMessageSeq = res.locals.lopy.currentSeq;
                             display.lopyMessageSync = true;
-                            /*display.history.append(new DisplayModification({
+                            display.history.append(new DisplayModification({
                                 modifierId: req.body.devEUI,
                                 modifierType: "lopy"
-                            }));*/
-                            display.save();
+                            }));
+                            display.save();*/
                         }
                     });
                 });
