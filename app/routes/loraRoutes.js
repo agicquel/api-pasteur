@@ -28,7 +28,7 @@ async function handleRequest(req, res) {
                         logger.debug("display found = " + util.inspect(display, {showHidden: false, depth: null}));
                         logger.debug("err = " + util.inspect(err, {showHidden: false, depth: null}));
 
-                        if(!err && display) {
+                        /*if(!err && display) {
                             display.message = esp.mes;
                             display.lopyMessageSeq = res.locals.lopy.currentSeq;
                             display.lopyMessageSync = true;
@@ -37,8 +37,7 @@ async function handleRequest(req, res) {
                                 modifierType: "lopy"
                             }));
                             display.save();
-
-                        }
+                        }*/
                     });
                 });
                 /*Display.findOneAndUpdate(
