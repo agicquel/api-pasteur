@@ -70,7 +70,7 @@ async function handleRequest(req, res) {
                     if(!err && display) {
                         display.lastLopy = req.body.devEUI.toString();
                         display.lopyMessageSync = false;
-                        display.lopyMessageSeq = res.locals.lopy.currentSeq;
+                        display.lopyMessageSeq = res.locals.lopy.currentSeq + 2;
                         display.save();
                     }
                 });
