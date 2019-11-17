@@ -19,7 +19,22 @@ async function handleRequest(req, res) {
         // Sync messages if needed
         if (res.locals.parsedData.hasOwnProperty("m")) {
             await res.locals.parsedData.m.forEach(function (esp) {
-                Display.findOneAndUpdate(
+                logger.debug("esp = " + util.inspect(esp, {showHidden: false, depth: null}));
+                Display.find({espId: esp.id}, function (err, display) {
+                    logger.debug("display found = " + util.inspect(display, {showHidden: false, depth: null}));
+                    if(!err && display) {
+                        display.message = esp.mes;
+                        display.lopyMessageSeq = res.locals.lopy.currentSeq;
+                        display.lopyMessageSync = true;
+                        display.history.push(new DisplayModification({
+                            modifierId: req.body.devEUI,
+                            modifierType: "lopy"
+                        }));
+                        display.save();
+
+                    }
+                });
+                /*Display.findOneAndUpdate(
                     {espId: esp.id},
                     {
                         $set: {
@@ -34,7 +49,7 @@ async function handleRequest(req, res) {
                             })
                         }
                     }
-                );
+                );*/
             });
         }
 
