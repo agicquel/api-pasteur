@@ -26,9 +26,11 @@ async function handleRequest(req, res) {
 
                     Display.find({espId: esp.id}, function (err, display) {
                         logger.debug("display found = " + util.inspect(display, {showHidden: false, depth: null}));
-                        logger.debug("err = " + util.inspect(err, {showHidden: false, depth: null}));
 
-                        /*if(!err && display) {
+                        if (typeof err !== 'undefined' && err !== null) {
+                            logger.debug("err = " + util.inspect(err, {showHidden: false, depth: null}));
+                        }
+                        else if (typeof display !== 'undefined' && display !== null) {
                             display.message = esp.mes;
                             display.lopyMessageSeq = res.locals.lopy.currentSeq;
                             display.lopyMessageSync = true;
@@ -37,27 +39,9 @@ async function handleRequest(req, res) {
                                 modifierType: "lopy"
                             }));
                             display.save();
-                        }*/
+                        }
                     });
                 });
-                /*Display.findOneAndUpdate(
-                    {espId: esp.id},
-                    {
-                        $set: {
-                            message: esp.mes,
-                            lopyMessageSync: true,
-                            lopyMessageSeq: res.locals.lopy.currentSeq
-                        },
-                        $push: {
-                            history: new DisplayModification({
-                                modifierId: req.body.devEUI,
-                                modifierType: "lopy"
-                            })
-                        }
-                    }
-                );*/
-            } else {
-                logger.debug("has NOT m property");
             }
         }
         catch(error) {
