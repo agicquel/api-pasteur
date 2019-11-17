@@ -34,10 +34,10 @@ async function handleRequest(req, res) {
                             display.message = esp.mes;
                             display.lopyMessageSeq = res.locals.lopy.currentSeq;
                             display.lopyMessageSync = true;
-                            display.history.append(new DisplayModification({
+                            /*display.history.append(new DisplayModification({
                                 modifierId: req.body.devEUI,
                                 modifierType: "lopy"
-                            }));
+                            }));*/
                             display.save();
                         }
                     });
