@@ -16,34 +16,6 @@ async function handleRequest(req, res) {
         res.locals.lopy.currentSeq = res.locals.parsedData.s;
         res.locals.lopy.save();
 
-        // Sync messages if needed
-        try {
-            if (res.locals.parsedData.hasOwnProperty("m")) {
-                logger.debug("has m property");
-                await res.locals.parsedData.m.forEach(function (esp) {
-                    Display.findOne({espId: esp.id}, function (err, display) {
-                        if (typeof err !== 'undefined' && err !== null) {
-                            logger.debug("err = " + util.inspect(err, {showHidden: false, depth: null}));
-                        }
-                        else if (typeof display !== 'undefined' && display !== null) {
-                            display.message = esp.mes.toString();
-                            display.lopyMessageSeq = res.locals.lopy.currentSeq;
-                            display.lopyMessageSync = true;
-                            display.history.push(new DisplayModification({
-                                modifierId: req.body.devEUI,
-                                modifierType: "lopy"
-                            }));
-                            display.save();
-
-                        }
-                    });
-                });
-            }
-        }
-        catch(error) {
-            logger.debug("error = " + util.inspect(error, {showHidden: false, depth: null}));
-        }
-
         if (res.locals.parsedData.hasOwnProperty("d")) {
             await res.locals.parsedData.d.forEach(function (espId) {
                 logger.debug("device disconnected = " + espId);
@@ -68,6 +40,29 @@ async function handleRequest(req, res) {
                         display.lopyMessageSync = false;
                         display.lopyMessageSeq = res.locals.lopy.currentSeq + 2;
                         display.save();
+                    }
+                });
+            });
+        }
+
+        // Sync messages if needed
+        if (res.locals.parsedData.hasOwnProperty("m")) {
+            logger.debug("has m property");
+            await res.locals.parsedData.m.forEach(function (esp) {
+                Display.findOne({espId: esp.id}, function (err, display) {
+                    if (typeof err !== 'undefined' && err !== null) {
+                        logger.debug("err = " + util.inspect(err, {showHidden: false, depth: null}));
+                    }
+                    else if (typeof display !== 'undefined' && display !== null) {
+                        display.message = esp.mes.toString();
+                        display.lopyMessageSeq = res.locals.lopy.currentSeq;
+                        display.lopyMessageSync = true;
+                        display.history.push(new DisplayModification({
+                            modifierId: req.body.devEUI,
+                            modifierType: "lopy"
+                        }));
+                        display.save();
+
                     }
                 });
             });
