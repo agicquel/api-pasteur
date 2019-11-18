@@ -21,26 +21,19 @@ async function handleRequest(req, res) {
             if (res.locals.parsedData.hasOwnProperty("m")) {
                 logger.debug("has m property");
                 await res.locals.parsedData.m.forEach(function (esp) {
-                    logger.debug("esp = " + util.inspect(esp, {showHidden: false, depth: null}));
-
-
-                    Display.find({espId: esp.id}, function (err, display) {
-                        logger.debug("display found = " + util.inspect(display, {showHidden: false, depth: null}));
-
+                    Display.findOne({espId: esp.id}, function (err, display) {
                         if (typeof err !== 'undefined' && err !== null) {
                             logger.debug("err = " + util.inspect(err, {showHidden: false, depth: null}));
                         }
                         else if (typeof display !== 'undefined' && display !== null) {
-                            /*display.message = esp.mes.toString();
+                            display.message = esp.mes.toString();
                             display.lopyMessageSeq = res.locals.lopy.currentSeq;
                             display.lopyMessageSync = true;
                             display.history.push(new DisplayModification({
                                 modifierId: req.body.devEUI,
                                 modifierType: "lopy"
                             }));
-                            display.save();*/
-                            logger.debug("type of display = " + (typeof display));
-                            logger.debug("display save = " + util.inspect(display, {showHidden: false, depth: null}));
+                            display.save();
 
                         }
                     });
