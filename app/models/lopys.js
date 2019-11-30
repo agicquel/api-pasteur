@@ -1,6 +1,7 @@
 const mongoose = require('mongoose');
 const Schema = mongoose.Schema;
 const LopyStatus = require("./lopystatus").schema;
+const timestamps = require('mongoose-timestamp');
 
 const Lopy = new Schema({
     mac: {
@@ -10,11 +11,12 @@ const Lopy = new Schema({
         unique: true
     },
     status: [LopyStatus],
-    //esp: [String],
     currentSeq: {
         type: Number,
         default: 0
     }
 });
+
+Lopy.plugin(timestamps);
 
 module.exports = mongoose.model('Lopy', Lopy);

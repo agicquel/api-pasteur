@@ -2,6 +2,7 @@ const mongoose = require('mongoose');
 const Schema = mongoose.Schema;
 const ObjectId = mongoose.Schema.Types.ObjectId;
 const DisplayModification = require("./displaymodifications").schema;
+const timestamps = require('mongoose-timestamp');
 
 const DisplaySchema = new Schema({
     name: {
@@ -21,14 +22,6 @@ const DisplaySchema = new Schema({
         dropDups: true
     },
     owners : [ObjectId],
-    createdAt: {
-        type: Date,
-        default: Date.now
-    },
-    updatedAt: {
-        type: Date,
-        default: Date.now
-    },
     history: [DisplayModification],
     lastLopy: {
         type: String
@@ -43,18 +36,6 @@ const DisplaySchema = new Schema({
     }
 });
 
-var updateTimestemps = function(next){
-    var self = this;
-    if(!self.createdAt) {
-        self.createdAt = new Date();
-    }
-    self.updatedAt= new Date();
-    next();
-};
-
-DisplaySchema.
-    pre('save', updateTimestemps ).
-    pre('update', updateTimestemps ).
-    pre('findOneAndUpdate', updateTimestemps);
+DisplaySchema.plugin(timestamps);
 
 module.exports = mongoose.model('Display', DisplaySchema);

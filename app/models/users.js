@@ -2,6 +2,7 @@ const mongoose = require('mongoose');
 const bcrypt = require('bcrypt');
 const saltRounds = 10;
 const Schema = mongoose.Schema;
+const timestamps = require('mongoose-timestamp');
 
 const UserSchema = new Schema({
     login: {
@@ -34,5 +35,6 @@ UserSchema.pre('save', function(next) {
     this.password = bcrypt.hashSync(this.password, saltRounds);
     next();
 });
+UserSchema.plugin(timestamps);
 
 module.exports = mongoose.model('User', UserSchema);
