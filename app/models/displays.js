@@ -43,4 +43,18 @@ const DisplaySchema = new Schema({
     }
 });
 
+var updateTimestemps = function(next){
+    var self = this;
+    if(!self.createdAt) {
+        self.createdAt = new Date();
+    }
+    self.updatedAt= new Date();
+    next();
+};
+
+DisplaySchema.
+    pre('save', updateTimestemps ).
+    pre('update', updateTimestemps ).
+    pre('findOneAndUpdate', updateTimestemps);
+
 module.exports = mongoose.model('Display', DisplaySchema);
