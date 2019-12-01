@@ -36,9 +36,12 @@ const DisplaySchema = new Schema({
     }
 });
 
+<<<<<<< HEAD
 DisplaySchema.plugin(timestamps, {
     createdAt: 'created_at',
     updatedAt: 'updated_at'
 });
 
+=======
+>>>>>>> parent of 15e603f... update timestamp
 module.exports = mongoose.model('Display', DisplaySchema);
