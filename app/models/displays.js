@@ -56,8 +56,10 @@ const updateTimestamps = function (next, done) {
     next();
 };
 
+const Display = mongoose.model('Display', DisplaySchema);
+
 DisplaySchema.pre('save', true, updateTimestamps );
 DisplaySchema.pre('update', true, updateTimestamps );
 DisplaySchema.pre('findOneAndUpdate', true, updateTimestamps);
 
-module.exports = mongoose.model('Display', DisplaySchema);
+module.exports = Display;
