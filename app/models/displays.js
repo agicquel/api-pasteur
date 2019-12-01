@@ -6,7 +6,7 @@ const DisplayModification = require("./displaymodifications").schema;
 const log4js = require('log4js');
 const logger = log4js.getLogger('console');
 
-const DisplaySchema = new Schema({
+let DisplaySchema = new Schema({
     name: {
         type: String,
         trim: true,
