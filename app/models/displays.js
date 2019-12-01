@@ -3,9 +3,6 @@ const Schema = mongoose.Schema;
 const ObjectId = mongoose.Schema.Types.ObjectId;
 const DisplayModification = require("./displaymodifications").schema;
 
-const log4js = require('log4js');
-const logger = log4js.getLogger('console');
-
 let DisplaySchema = new Schema({
     name: {
         type: String,
@@ -52,7 +49,6 @@ DisplaySchema.pre('save', function(next) {
         self.createdAt = new Date();
     }
     self.updatedAt = new Date();
-    logger.debug("time update triggered");
     next();
 });
 
