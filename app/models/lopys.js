@@ -1,7 +1,6 @@
 const mongoose = require('mongoose');
 const Schema = mongoose.Schema;
 const LopyStatus = require("./lopystatus").schema;
-const timestamps = require('mongoose-timestamp');
 
 const Lopy = new Schema({
     mac: {
@@ -15,11 +14,6 @@ const Lopy = new Schema({
         type: Number,
         default: 0
     }
-});
-
-Lopy.plugin(timestamps, {
-    createdAt: 'created_at',
-    updatedAt: 'updated_at'
 });
 
 module.exports = mongoose.model('Lopy', Lopy);

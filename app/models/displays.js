@@ -2,7 +2,9 @@ const mongoose = require('mongoose');
 const Schema = mongoose.Schema;
 const ObjectId = mongoose.Schema.Types.ObjectId;
 const DisplayModification = require("./displaymodifications").schema;
-const timestamps = require('mongoose-timestamp');
+
+const log4js = require('log4js');
+const logger = log4js.getLogger('console');
 
 const DisplaySchema = new Schema({
     name: {
@@ -22,6 +24,14 @@ const DisplaySchema = new Schema({
         dropDups: true
     },
     owners : [ObjectId],
+    createdAt: {
+        type: Date,
+        default: Date.now
+    },
+    updatedAt: {
+        type: Date,
+        default: Date.now
+    },
     history: [DisplayModification],
     lastLopy: {
         type: String
@@ -36,12 +46,19 @@ const DisplaySchema = new Schema({
     }
 });
 
-<<<<<<< HEAD
-DisplaySchema.plugin(timestamps, {
-    createdAt: 'created_at',
-    updatedAt: 'updated_at'
-});
+var updateTimestemps = function(next){
+    var self = this;
+    if(!self.createdAt) {
+        self.createdAt = new Date();
+    }
+    self.updatedAt = new Date();
+    logger.debug("time update triggered");
+    next();
+};
 
-=======
->>>>>>> parent of 15e603f... update timestamp
+DisplaySchema.
+pre('save', updateTimestemps ).
+pre('update', updateTimestemps ).
+pre('findOneAndUpdate', updateTimestemps);
+
 module.exports = mongoose.model('Display', DisplaySchema);
