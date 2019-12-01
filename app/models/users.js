@@ -35,6 +35,9 @@ UserSchema.pre('save', function(next) {
     this.password = bcrypt.hashSync(this.password, saltRounds);
     next();
 });
-UserSchema.plugin(timestamps);
+UserSchema.plugin(timestamps, {
+    createdAt: 'created_at',
+    updatedAt: 'updated_at'
+});
 
 module.exports = mongoose.model('User', UserSchema);

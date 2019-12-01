@@ -36,6 +36,9 @@ const DisplaySchema = new Schema({
     }
 });
 
-DisplaySchema.plugin(timestamps);
+DisplaySchema.plugin(timestamps, {
+    createdAt: 'created_at',
+    updatedAt: 'updated_at'
+});
 
 module.exports = mongoose.model('Display', DisplaySchema);

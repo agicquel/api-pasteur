@@ -17,6 +17,9 @@ const Lopy = new Schema({
     }
 });
 
-Lopy.plugin(timestamps);
+Lopy.plugin(timestamps, {
+    createdAt: 'created_at',
+    updatedAt: 'updated_at'
+});
 
 module.exports = mongoose.model('Lopy', Lopy);
