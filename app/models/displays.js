@@ -46,9 +46,9 @@ const DisplaySchema = new Schema({
     }
 });
 
-var updateTimestemps = function(next){
-    var self = this;
-    if(!self.createdAt) {
+const updateTimestamps = function (next, done) {
+    let self = this;
+    if (!self.createdAt) {
         self.createdAt = new Date();
     }
     self.updatedAt = new Date();
@@ -56,9 +56,8 @@ var updateTimestemps = function(next){
     next();
 };
 
-DisplaySchema.
-pre('save', updateTimestemps ).
-pre('update', updateTimestemps ).
-pre('findOneAndUpdate', updateTimestemps);
+DisplaySchema.pre('save', true, updateTimestamps );
+DisplaySchema.pre('update', true, updateTimestamps );
+DisplaySchema.pre('findOneAndUpdate', true, updateTimestamps);
 
 module.exports = mongoose.model('Display', DisplaySchema);
