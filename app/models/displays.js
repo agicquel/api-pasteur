@@ -43,10 +43,10 @@ let DisplaySchema = new Schema({
     }
 });
 
-DisplaySchema.pre('save', function(next) {
+/*DisplaySchema.pre('save', function(next) {
     var self = this;
     self.updatedAt = new Date();
     next();
-});
+});*/
 
 module.exports = mongoose.model('Display', DisplaySchema);
