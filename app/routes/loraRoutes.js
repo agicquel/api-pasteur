@@ -103,7 +103,11 @@ async function handleRequest(req, res) {
                     logger.debug("d = " + d._id + "Save new seq = " + (res.locals.lopy.currentSeq + 2));
                     d.lopyMessageSeq = res.locals.lopy.currentSeq + 2;
                 }
-                d.save();
+                d.save(function (err) {
+                    if (err) {
+                        logger.debug("err = " + err);
+                    }
+                });
             });
 
             let data = {};
