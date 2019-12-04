@@ -16,6 +16,8 @@ exports.validateUser = function(req, res, next) {
             User.findById(res.locals.userId, function(err, user) {
                 if(!err && user && user.role) {
                     res.locals.userRole = user.role;
+                    res.locals.userLogin = user.login;
+                    res.locals.userEmail = user.email;
                 }
                 next();
             });

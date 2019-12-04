@@ -13,7 +13,14 @@ const DisplayModification = new Schema({
     time: {
         type: Date,
         default: Date.now
-    }
+    },
+    message: {
+        type: String,
+        required: true
+    },
+    user: {
+        type: String
+    },
 });
 
 module.exports = mongoose.model('DisplayModification', DisplayModification);

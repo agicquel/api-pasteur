@@ -25,7 +25,12 @@ exports.getAll = function(req, res) {
 exports.add = function(req, res) {
     let newDisplay = new Display({name : req.body.name, message: req.body.message, espId : req.body.espId});
     newDisplay.owners.push(res.locals.userId);
-    let modHist = new DisplayModification({modifierId:res.locals.userId, modifierType:res.locals.userRole});
+    let modHist = new DisplayModification({
+        modifierId:res.locals.userId,
+        modifierType:res.locals.userRole,
+        message:newDisplay.message,
+        user:res.locals.userLogin
+    });
     newDisplay.history.push(modHist);
     newDisplay.save(function (err, display) {
         if (err)
@@ -54,43 +59,6 @@ exports.get = function(req, res) {
     });
 };
 
-/*exports.update = function(req, res) {
-    let filter = {};
-    if(res.locals.userRole == "admin") {
-        filter = {
-            _id: req.params.id,
-        }
-    }
-    else if(res.locals.userRole == "user") {
-        filter = {
-            _id: req.params.id,
-            owners: {"$in" : res.locals.userId}
-        }
-    }
-    Display.findOne(filter, function (err, display) {
-        if(err) {
-            res.send(err);
-        }
-        if(display) {
-            display.name = req.body.name;
-            display.message = req.body.message;
-            display.espId = req.body.espId;
-            display.lopyMessageSync = req.body.espId;
-            display.history.append(new DisplayModification({modifierId:res.locals.userId, modifierType:res.locals.userRole}));
-            if(typeof display.lastLopy != "undefined") {
-                Lopy.find({mac: display.lastLopy}, function (err, lopy) {
-                    if(!err && lopy) {
-                        display.lopyMessageSeq = lopy.currentSeq;
-                    }
-                });
-            }
-            display.save();
-            res.json(display);
-        }
-    });
-};
-*/
-
 exports.update = function(req, res) {
     if (res.locals.userRole == "admin") {
         Display.findOneAndUpdate({
@@ -105,7 +73,9 @@ exports.update = function(req, res) {
             $push: {
                 history: new DisplayModification({
                     modifierId: res.locals.userId,
-                    modifierType: res.locals.userRole
+                    modifierType: res.locals.userRole,
+                    message:req.body.message,
+                    user:res.locals.userLogin
                 })
             }
         }, {
@@ -130,7 +100,9 @@ exports.update = function(req, res) {
             $push: {
                 history: new DisplayModification({
                     modifierId: res.locals.userId,
-                    modifierType: res.locals.userRole
+                    modifierType: res.locals.userRole,
+                    message:req.body.message,
+                    user:res.locals.userLogin
                 })
             }
         }, {
@@ -234,7 +206,12 @@ exports.declare = function(req, res) {
         if (err || !display) {
             var newDisplay = new Display({name : 'ESP-' + req.params.espid, espId : req.params.espid});
             newDisplay.owners.push(res.locals.userId);
-            newDisplay.history.push(new DisplayModification({modifierId:res.locals.userId, modifierType:res.locals.userRole}));
+            newDisplay.history.push(new DisplayModification({
+                modifierId:res.locals.userId,
+                modifierType:res.locals.userRole,
+                message:newDisplay.message,
+                user:res.locals.userLogin
+            }));
             newDisplay.save(function(err, display) {
                 if (err)
                     res.send(err);
