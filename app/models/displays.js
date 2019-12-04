@@ -3,7 +3,7 @@ const Schema = mongoose.Schema;
 const ObjectId = mongoose.Schema.Types.ObjectId;
 const DisplayModification = require("./displaymodifications").schema;
 
-const DisplaySchema = new Schema({
+let DisplaySchema = new Schema({
     name: {
         type: String,
         trim: true,
@@ -41,6 +41,15 @@ const DisplaySchema = new Schema({
         type: Boolean,
         default: false
     }
+});
+
+DisplaySchema.pre('save', function(next) {
+    let self = this;
+    if (!self.createdAt) {
+        self.createdAt = new Date();
+    }
+    self.updatedAt = new Date();
+    next();
 });
 
 module.exports = mongoose.model('Display', DisplaySchema);

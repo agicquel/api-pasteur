@@ -2,7 +2,7 @@ const mongoose = require('mongoose');
 const Schema = mongoose.Schema;
 const LopyStatus = require("./lopystatus").schema;
 
-const Lopy = new Schema({
+let Lopy = new Schema({
     mac: {
         type: String,
         trim: true,
@@ -10,11 +10,27 @@ const Lopy = new Schema({
         unique: true
     },
     status: [LopyStatus],
-    //esp: [String],
     currentSeq: {
         type: Number,
         default: 0
+    },
+    createdAt: {
+        type: Date,
+        default: Date.now
+    },
+    updatedAt: {
+        type: Date,
+        default: Date.now
     }
+});
+
+Lopy.pre('save', function(next) {
+    let self = this;
+    if (!self.createdAt) {
+        self.createdAt = new Date();
+    }
+    self.updatedAt = new Date();
+    next();
 });
 
 module.exports = mongoose.model('Lopy', Lopy);
