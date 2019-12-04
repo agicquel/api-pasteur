@@ -100,6 +100,7 @@ async function handleRequest(req, res) {
                         response.push(data);
                 }
                 else {
+                    logger.debug("d = " + d._id + "Save new seq = " + (res.locals.lopy.currentSeq + 2));
                     d.lopyMessageSeq = res.locals.lopy.currentSeq + 2;
                 }
                 d.save();
