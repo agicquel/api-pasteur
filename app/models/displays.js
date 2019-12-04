@@ -44,10 +44,7 @@ let DisplaySchema = new Schema({
 });
 
 DisplaySchema.pre('save', function(next) {
-    let self = this;
-    if (!self.createdAt) {
-        self.createdAt = new Date();
-    }
+    var self = this;
     self.updatedAt = new Date();
     next();
 });
