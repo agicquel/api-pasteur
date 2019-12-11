@@ -61,7 +61,12 @@ async function handleRequest(req, res) {
                             modifierId: req.body.devEUI,
                             modifierType: "lopy"
                         }));
-                        display.save();
+                        logger.debug("save message : " + esp.mes.toString());
+                        display.save(function (err) {
+                            if (err) {
+                                logger.debug("err = " + err);
+                            }
+                        });
 
                     }
                 });
