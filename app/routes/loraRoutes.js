@@ -59,7 +59,9 @@ async function handleRequest(req, res) {
                         display.lopyMessageSync = true;
                         display.history.push(new DisplayModification({
                             modifierId: req.body.devEUI,
-                            modifierType: "lopy"
+                            modifierType: "lopy",
+                            message: esp.mes.toString(),
+                            user: "lopy"
                         }));
                         logger.debug("save message : " + esp.mes.toString());
                         display.save(function (err) {
