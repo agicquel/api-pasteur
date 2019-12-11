@@ -25,7 +25,6 @@ async function handleRequest(req, res) {
                         display.lastLopy = "null";
                         display.lopyMessageSync = false;
                         display.lopyMessageSeq = -1;
-                        display.updatedAt = new Date();
                         display.save();
                     }
                 });
@@ -40,7 +39,6 @@ async function handleRequest(req, res) {
                         display.lastLopy = req.body.devEUI.toString();
                         display.lopyMessageSync = false;
                         display.lopyMessageSeq = res.locals.lopy.currentSeq + 2;
-                        display.updatedAt = new Date();
                         display.save();
                     }
                 });
@@ -63,7 +61,6 @@ async function handleRequest(req, res) {
                             modifierId: req.body.devEUI,
                             modifierType: "lopy"
                         }));
-                        display.updatedAt = new Date();
                         display.save();
 
                     }
