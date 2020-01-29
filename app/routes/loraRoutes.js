@@ -53,7 +53,7 @@ async function handleRequest(req, res) {
                     if (typeof err !== 'undefined' && err !== null) {
                         logger.debug("err = " + util.inspect(err, {showHidden: false, depth: null}));
                     }
-                    else if (typeof display !== 'undefined' && display !== null) {
+                    else if (typeof display !== 'undefined' && display !== null && display.lopyMessageSync) {
                         display.message = esp.mes.toString();
                         display.lopyMessageSeq = res.locals.lopy.currentSeq;
                         display.lopyMessageSync = true;
