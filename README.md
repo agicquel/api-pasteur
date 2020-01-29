@@ -49,3 +49,4 @@ In the folder *scripts* there are several scripts :
 
  - **createAdmin.js** : Create a new admin in the mongo database with the role '*admin*'
  - **authUser.js** : Authenticate a user, generate a JWT token
+
