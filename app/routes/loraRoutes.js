@@ -57,6 +57,7 @@ async function handleRequest(req, res) {
                         display.message = esp.mes.toString();
                         display.lopyMessageSeq = res.locals.lopy.currentSeq;
                         display.lopyMessageSync = true;
+                        display.lopyMessageSendCounter = 0;
                         display.history.push(new DisplayModification({
                             modifierId: req.body.devEUI,
                             modifierType: "lopy",
@@ -88,7 +89,7 @@ async function handleRequest(req, res) {
         let response = [];
         if (!err && displays) {
             displays.forEach(d => {
-                if(res.locals.lopy.currentSeq == d.lopyMessageSeq) {
+                if(res.locals.lopy.currentSeq == d.lopyMessageSeq && d.lopyMessageSendCounter > 0) {
                     d.lopyMessageSync = true
                 }
                 else if((res.locals.lopy.currentSeq +1) == d.lopyMessageSeq) {
@@ -100,6 +101,7 @@ async function handleRequest(req, res) {
                             id: d.espId,
                             mes: message
                         };
+                        d.lopyMessageSendCounter = d.lopyMessageSendCounter + 1;
                         logger.debug("send message = " + d.message);
                         response.push(data);
                 }

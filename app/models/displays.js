@@ -40,6 +40,10 @@ let DisplaySchema = new Schema({
     lopyMessageSync : {
         type: Boolean,
         default: false
+    },
+    lopyMessageSendCounter: {
+        type: Number,
+        default: 0
     }
 });
 

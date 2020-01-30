@@ -68,7 +68,8 @@ exports.update = function(req, res) {
                 name: req.body.name,
                 message: req.body.message,
                 espId: req.body.espId,
-                lopyMessageSync: false
+                lopyMessageSync: false,
+                lopyMessageSendCounter: 0
             },
             $push: {
                 history: new DisplayModification({
@@ -95,7 +96,8 @@ exports.update = function(req, res) {
                 name: req.body.name,
                 message: req.body.message,
                 espId: req.body.espId,
-                lopyMessageSync: false
+                lopyMessageSync: false,
+                lopyMessageSendCounter: 0
             },
             $push: {
                 history: new DisplayModification({
