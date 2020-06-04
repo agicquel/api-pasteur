@@ -1,25 +1,21 @@
 const mongoose = require('mongoose');
 const Display = mongoose.model('Display');
 const DisplayModification = mongoose.model('DisplayModification');
-const Lopy = mongoose.model('Lopy');
 
 exports.getAll = function(req, res) {
-    if(res.locals.userRole == "admin") {
-        Display.find({}, function(err, display) {
-            if (err)
-                res.send(err);
-            else
-                res.json(display);
-        });
+    let findOption = {};
+    if(res.locals.userRole === "user") {
+        findOption.owners = {"$in" : res.locals.userId};
     }
-    else if(res.locals.userRole == "user") {
-        Display.find({owners: {"$in" : res.locals.userId}}, function(err, display) {
-            if (err)
-                res.send(err);
-            else
-                res.json(display);
-        });
-    }
+
+    Display.find(findOption, function(err, displays) {
+        if (err) {
+            res.status(400).send(err);
+        }
+        else {
+            res.status(200).json(displays);
+        }
+    });
 };
 
 exports.add = function(req, res) {
@@ -33,143 +29,115 @@ exports.add = function(req, res) {
     });
     newDisplay.history.push(modHist);
     newDisplay.save(function (err, display) {
-        if (err)
-            res.send(err);
-        else
-            res.json(display);
+        if (err) {
+            res.status(405).send("Invalid input.");
+        } else {
+            res.status(200).json(display);
+        }
     });
 };
 
 exports.get = function(req, res) {
     Display.findById(req.params.id, function(err, display) {
-        if (err)
-            res.send(err);
+        if (err) {
+            res.status(400).send(err);
+        }
+        else if(display == null) {
+            res.status(404).send("Display not found");
+        }
         else {
-            if(res.locals.userRole == "admin") {
-                res.json(display);
+            if(res.locals.userRole === "admin") {
+                res.status(200).json(display);
             }
-            else if(res.locals.userRole == "user") {
+            else if(res.locals.userRole === "user") {
                 if(!display.owners || !display.owners.includes(res.locals.userId)) {
-                    res.send("You do not have permission to access.")
+                    res.status(403).send("You do not have permission to access.")
                 }
-                else
-                    res.json(display);
+                else {
+                    res.status(200).json(display);
+                }
             }
         }
     });
 };
 
 exports.update = function(req, res) {
-    if (res.locals.userRole == "admin") {
-        Display.findOneAndUpdate({
-            _id: req.params.id,
-        }, {
-            $set: {
-                name: req.body.name,
-                message: req.body.message,
-                espId: req.body.espId,
-                lopyMessageSync: false,
-                lopyMessageSendCounter: 0
-            },
-            $push: {
-                history: new DisplayModification({
-                    modifierId: res.locals.userId,
-                    modifierType: res.locals.userRole,
-                    message:req.body.message,
-                    user:res.locals.userLogin
-                })
-            }
-        }, {
-            new: true
-        }, function (err, display) {
-            if (err)
-                res.send(err);
-            else
-                res.json(display);
-        });
-    } else if (res.locals.userRole == "user") {
-        Display.findOneAndUpdate({
-            _id: req.params.id,
-            owners: {"$in": res.locals.userId}
-        }, {
-            $set: {
-                name: req.body.name,
-                message: req.body.message,
-                espId: req.body.espId,
-                lopyMessageSync: false,
-                lopyMessageSendCounter: 0
-            },
-            $push: {
-                history: new DisplayModification({
-                    modifierId: res.locals.userId,
-                    modifierType: res.locals.userRole,
-                    message:req.body.message,
-                    user:res.locals.userLogin
-                })
-            }
-        }, {
-            new: true
-        }, function (err, display) {
-            if (err)
-                res.send(err);
-            else
-                res.json(display);
-        });
+    let findOption = {_id: req.params.id};
+    if(res.locals.userRole === "user") {
+        findOption.owners = {"$in" : res.locals.userId};
     }
+
+    Display.findOneAndUpdate(findOption, {
+        $set: {
+            name: req.body.name,
+            message: req.body.message,
+            espId: req.body.espId,
+            lopyMessageSync: false,
+            lopyMessageSendCounter: 0
+        },
+        $push: {
+            history: new DisplayModification({
+                modifierId: res.locals.userId,
+                modifierType: res.locals.userRole,
+                message:req.body.message,
+                user:res.locals.userLogin
+            })
+        }
+    }, {
+        new: true
+    }, function (err, display) {
+        if (err) {
+            res.status(405).send(err);
+        }
+        else if(display === null) {
+            res.status(404).send("Display not found");
+        }
+        else {
+            res.status(200).json(display);
+        }
+    });
 }
 
 exports.delete = function(req, res) {
-    if(res.locals.userRole == "admin") {
-        Display.deleteOne({
-            _id: req.params.id,
-        }, function(err, display) {
-            
-            if (err)
-                res.send(err);
-            else
-                res.json({
-                    message: 'Display successfully deleted'
-                });
-        });
+    let findOption = {_id: req.params.id};
+    if(res.locals.userRole === "user") {
+        findOption.owners = {"$in" : res.locals.userId};
     }
-    else if(res.locals.userRole == "user") {
-        Display.deleteOne({
-            _id: req.params.id,
-            owners: {"$in" : res.locals.userId}
-        }, function(err, display) {
-            
-            if (err)
-                res.send(err);
-            else
-                res.json({
-                    message: 'Display successfully deleted'
-                });
-        });
-    }
+
+    Display.deleteOne(findOption, function(err, doc) {
+        if (err || doc.ok !== 1) {
+            res.status(400).send("Invalid ID supplied");
+        }
+        else if(doc.deletedCount === 0) {
+            res.status(404).send("Display not found");
+        }
+        else {
+            res.status(200).send("Display deleted");
+        }
+    });
 };
 
 exports.addOwner = function(req, res) {
     if(!req.body.ownerId || !mongoose.Types.ObjectId.isValid(req.body.ownerId)) {
-        res.send("Bad owner id.");
+        res.status(400).send("Invalid owner ID supplied.");
     }
     else {
         Display.findById(req.params.id, function(err, display) {
-            if (err)
-                res.send(err);
+            if (err) {
+                res.status(405).send(err);
+            }
+            else if(res.locals.userRole === "user" && (!display.owners || !display.owners.includes(res.locals.userId))) {
+                res.status(403).send("You do not have permission to access.");
+            }
             else {
-                if(res.locals.userRole == "user" && (!display.owners || !display.owners.includes(res.locals.userId))) {
-                    res.send("You do not have permission to access.");
+                if(!display.owners) {
+                    display.owners = [];
                 }
-                else {
-                    if(!display.owners) {
-                        display.owners = [];
-                    }
-                    if (display.owners.indexOf(req.body.ownerId) === -1){
-                        display.owners.push(req.body.ownerId);
-                    }
-                    display.save();
-                    res.send("Owner added.");
+                if (display.owners.indexOf(req.body.ownerId) === -1){
+                    display.owners.push(req.body.ownerId);
                 }
+                display.save();
+                res.status(200).send("Owner added.");
             }
         });
     }
@@ -177,33 +145,41 @@ exports.addOwner = function(req, res) {
 
 exports.deleteOwner = function(req, res) {
     if(!req.body.ownerId || !mongoose.Types.ObjectId.isValid(req.body.ownerId)) {
-        res.send("Bad owner id.");
+        res.status(400).send("Invalid owner ID supplied.");
     }
     else {
         Display.findById(req.params.id, function(err, display) {
-            if (err)
-                res.send(err);
+            if (err) {
+                res.status(405).send(err);
+            }
+            else if(res.locals.userRole === "user" && (!display.owners || !display.owners.includes(res.locals.userId))) {
+                res.status(403).send("You do not have permission to access.");
+            }
             else {
-                if(res.locals.userRole == "user" && (!display.owners || !display.owners.includes(res.locals.userId))) {
-                    res.send("You do not have permission to access.");
+                if(!display.owners) {
+                    display.owners = [];
                 }
-                else {
-                    if(!display.owners) {
-                        display.owners = [];
-                    }
-                    var index = display.owners.indexOf(req.body.ownerId);
-                    if (index !== -1){
-                        display.owners.splice(index, 1);
-                    }
-                    display.save();
-                    res.send("Owner deleted.");
+                var index = display.owners.indexOf(req.body.ownerId);
+                if (index !== -1){
+                    display.owners.splice(index, 1);
                 }
+                display.save();
+                res.status(200).send("Owner deleted.");
             }
         });
     }
 };
 
 exports.declare = function(req, res) {
+    const saveCallback = function(err, display) {
+        if (err) {
+            res.status(400).send(err);
+        }
+        else {
+            res.status(200).json(display);
+        }
+    };
+
     Display.findOne({ espId: { "$in" : req.params.espid} }, function(err, display) {
         if (err || !display) {
             var newDisplay = new Display({name : 'ESP-' + req.params.espid, espId : req.params.espid});
@@ -214,12 +190,7 @@ exports.declare = function(req, res) {
                 message:newDisplay.message,
                 user:res.locals.userLogin
             }));
-            newDisplay.save(function(err, display) {
-                if (err)
-                    res.send(err);
-                else
-                    res.json(display);
-            });
+            newDisplay.save(saveCallback);
         }
         else {
             if(!display.owners) {
@@ -228,12 +199,7 @@ exports.declare = function(req, res) {
             if (display.owners.indexOf(res.locals.userId) === -1){
                 display.owners.push(res.locals.userId);
             }
-            display.save(function(err, display) {
-                if (err)
-                    res.send(err);
-                else
-                    res.json(display);
-            });
+            display.save(saveCallback);
         }
     });
 };

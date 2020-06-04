@@ -24,29 +24,37 @@ require('./app/models/lopys');
 
 // connection to mongodb server
 mongoose.Promise = global.Promise;
-if(!process.env.MONGO_USERNAME || !process.env.MONGO_PASSWORD || (process.env.MONGO_USERNAME === "" && process.env.MONGO_PASSWORD === "")) {
-    mongoose.connect('mongodb://' + process.env.MONGO_HOST + ':' + process.env.MONGO_PORT + '/' + process.env.MONGO_DATABASE, {
-        useNewUrlParser: true,
-        useUnifiedTopology: true,
-        useFindAndModify: false,
-        useCreateIndex: true
-    });
+let urlMongo;
+const optionMongo = {
+    useNewUrlParser: true,
+    useUnifiedTopology: true,
+    useCreateIndex: true
+};
+
+if(process.env.MONGO_USERNAME !== undefined && process.env.MONGO_PASSWORD !== undefined && process.env.MONGO_USERNAME !== "" && process.env.MONGO_PASSWORD !== "") {
+    urlMongo = 'mongodb://' + process.env.MONGO_USERNAME + ':' + process.env.MONGO_PASSWORD
+        + '@' + process.env.MONGO_HOST + ':' + process.env.MONGO_PORT + '/' + process.env.MONGO_DATABASE
 }
 else {
-    mongoose.connect('mongodb://' + process.env.MONGO_USERNAME + ':' + process.env.MONGO_PASSWORD + '@' + process.env.MONGO_HOST + ':' + process.env.MONGO_PORT + '/' + process.env.MONGO_DATABASE , {
-        useNewUrlParser: true,
-        useUnifiedTopology: true,
-        useFindAndModify: false,
-        useCreateIndex: true
-    });
+    urlMongo = 'mongodb://' + process.env.MONGO_HOST + ':' + process.env.MONGO_PORT + '/' + process.env.MONGO_DATABASE;
 }
+
+const connectWithRetry = function() {
+    return mongoose.connect(urlMongo , optionMongo, function(err) {
+        if (err) {
+            console.error('Failed to connect to mongo on startup - retrying in 1 sec', err);
+            setTimeout(connectWithRetry, 1000);
+        }
+    });
+};
+connectWithRetry();
 
 // create a rotating write stream
 function pad(num) {
     return (num > 9 ? "" : "0") + num;
 }
 
-let accessLogStream = rfs(function (time, index) {
+let accessLogStream = rfs.createStream(function (time, index) {
     if (!time) return "access.log";
     const year = time.getFullYear();
     const month = pad(time.getMonth() + 1);

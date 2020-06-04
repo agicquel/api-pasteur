@@ -1,0 +1,21 @@
+version: "3"
+
+services:
+  api-pasteur:
+    container_name: api-pasteur
+    restart: always
+    build: .
+    ports:
+      - "8080:8080"
+    links:
+      - "mongodb:mongodb"
+    depends_on:
+      - mongodb
+
+  mongodb:
+    container_name: mongo-pasteur
+    image: mongo:4.2
+    volumes:
+      - ./data:/data/db
+    ports:
+      - "27017:27017"

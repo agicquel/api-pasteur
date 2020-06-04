@@ -2,8 +2,8 @@ const router = require('express').Router();
 const usersController = require('../controllers/usersController');
 const auth = require('../middleware/authUserMiddleware');
 
-if (process.env.USER_REGISTRATION_OPEN_PUBLIC == 'true') {
-    router.post('/users/register', usersController.create);
+if (process.env.USER_REGISTRATION_OPEN_PUBLIC === 'true') {
+    router.post('/users/register', auth.validateUserNotBlocking, usersController.create);
 }
 else {
     router.post('/users/register', auth.validateUser, usersController.create);
