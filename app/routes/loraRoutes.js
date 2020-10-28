@@ -170,14 +170,23 @@ async function handleRequestReset(req, res) {
 router.post('/', loraController.loraValidate, async function (req, res) {
     try {
         logger.debug("parsed data = " + util.inspect(res.locals.parsedData, {showHidden: false, depth: null}));
-        if (res.locals.parsedData.s === 0) {
+
+        let responseStruct = {
+            'fPort': req.body.fPort,
+            'data': new Buffer("OK").toString("base64"),
+            'devEUI': req.body.devEUI
+        };
+        res.end(JSON.stringify(responseStruct));
+        res.end();
+
+        /*if (res.locals.parsedData.s === 0) {
             logger.debug("call handleRequestReset");
             await handleRequestReset(req, res);
         }
         else {
             logger.debug("call handleRequest");
             await handleRequest(req, res);
-        }
+        }*/
 
     } catch (error) {
         logger.debug("erreur processing : " + error);

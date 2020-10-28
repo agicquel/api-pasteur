@@ -1,6 +1,6 @@
 FROM node:14
 
-WORKDIR /usr/src/dock
+WORKDIR /usr/src/
 RUN mkdir -p /usr/src/app
 RUN mkdir -p /usr/src/app/logs
 
