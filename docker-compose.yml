@@ -5,15 +5,10 @@ services:
     container_name: api-pasteur
     restart: always
     build: .
-    ports:
-      - "8080:8080"
-    links:
-      - "mongodb:mongodb"
-    depends_on:
-      - mongodb
+    environment:
+      - "VIRTUAL_HOST=lora.agicquel.com"
+      - "VIRTUAL_PORT=8080"
+      - "LETSENCRYPT_HOST=lora.agicquel.com"
+      - "LETSENCRYPT_EMAIL=antoine.gicquel@mailoo.org"
+    network_mode: bridge
 
-  mongodb:
-    container_name: mongo-pasteur
-    image: mongo:4.4
-    volumes:
-      - ./data:/data/db

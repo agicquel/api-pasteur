@@ -18,11 +18,10 @@ exports.loraValidate = function(req, res, next) {
             } else if (!req.body.data) {
                 res.status(400).send("Data missing");
             } else {
-                next();
-                //logger.debug("req = " + util.inspect(req.body, {showHidden: false, depth: null}));
+                logger.debug("req = " + util.inspect(req.body, {showHidden: false, depth: null}));
 
                 // save Lopy status
-                /*Lopy.findOne({ mac: { "$in" : req.body.devEUI} }, function(err, lopy) {
+                Lopy.findOne({ mac: { "$in" : req.body.devEUI} }, function(err, lopy) {
                     if (err || !lopy) {
                         lopy = new Lopy({mac: req.body.devEUI});
                     }
@@ -74,12 +73,13 @@ exports.loraValidate = function(req, res, next) {
                         else {
                             res.locals.lopy = savedLopy;
                             let buff = Buffer.from(req.body.data, 'base64');
-                            let data_buff = buff.toString('ascii');
-                            res.locals.parsedData = JSON.parse(data_buff);
+                            //let data_buff = buff.toString('ascii');
+                            //res.locals.parsedData = JSON.parse(data_buff);
+                            res.locals.parsedData = buff.toString('ascii');
                             next();
                         }
                     });
-                });*/
+                });
             }
         }
         catch (error) {

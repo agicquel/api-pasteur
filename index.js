@@ -26,18 +26,14 @@ require('./app/models/lopys');
 mongoose.Promise = global.Promise;
 let urlMongo;
 const optionMongo = {
+    user: process.env.MONGO_USERNAME,
+    pass: process.env.MONGO_PASSWORD,
     useNewUrlParser: true,
     useUnifiedTopology: true,
     useCreateIndex: true
 };
 
-if(process.env.MONGO_USERNAME !== undefined && process.env.MONGO_PASSWORD !== undefined && process.env.MONGO_USERNAME !== "" && process.env.MONGO_PASSWORD !== "") {
-    urlMongo = 'mongodb://' + process.env.MONGO_USERNAME + ':' + process.env.MONGO_PASSWORD
-        + '@' + process.env.MONGO_HOST + ':' + process.env.MONGO_PORT + '/' + process.env.MONGO_DATABASE
-}
-else {
-    urlMongo = 'mongodb://' + process.env.MONGO_HOST + ':' + process.env.MONGO_PORT + '/' + process.env.MONGO_DATABASE;
-}
+urlMongo = 'mongodb://' + process.env.MONGO_HOST + ':' + process.env.MONGO_PORT + '/' + process.env.MONGO_DATABASE + "?authSource=admin"
 
 const connectWithRetry = function() {
     return mongoose.connect(urlMongo , optionMongo, function(err) {

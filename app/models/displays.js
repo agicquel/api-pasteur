@@ -12,7 +12,7 @@ let DisplaySchema = new Schema({
     message: {
         type: String,
         trim: true,
-        default: "..."
+        default: ""
     },
     espId: {
         type: String,

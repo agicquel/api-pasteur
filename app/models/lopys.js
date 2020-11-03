@@ -10,9 +10,13 @@ let Lopy = new Schema({
         unique: true
     },
     status: [LopyStatus],
-    currentSeq: {
+    currentReqNum: {
         type: Number,
         default: 0
+    },
+    currentReqData: {
+        type: String,
+        default: ""
     },
     createdAt: {
         type: Date,
