@@ -33,18 +33,15 @@ let DisplaySchema = new Schema({
     lastLopy: {
         type: String
     },
-    lopyMessageSeq: {
-        type: Number,
-        default: 0
-    },
     lopyMessageSync : {
         type: Boolean,
         default: false
     },
-    lopyMessageSendCounter: {
-        type: Number,
-        default: 0
-    }
+    lopyMessageSynching : {
+        type: Boolean,
+        default: false
+    },
+    lopyRequest : [String]
 });
 
 DisplaySchema.pre('save', function(next) {

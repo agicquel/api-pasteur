@@ -22,6 +22,10 @@ let Lopy = new Schema({
         type: String,
         default: ""
     },
+    currentSynching: {
+        type: String,
+        default: ""
+    },
     createdAt: {
         type: Date,
         default: Date.now
