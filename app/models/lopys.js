@@ -18,6 +18,10 @@ let Lopy = new Schema({
         type: String,
         default: ""
     },
+    currentReqExtraData: {
+        type: String,
+        default: ""
+    },
     createdAt: {
         type: Date,
         default: Date.now

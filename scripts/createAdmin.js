@@ -25,20 +25,24 @@ if(!commander.login || !commander.email || !commander.password) {
 
 // connection to mongodb server
 mongoose.Promise = global.Promise;
-let urlMongo;
 const optionMongo = {
+    user: process.env.MONGO_USERNAME,
+    pass: process.env.MONGO_PASSWORD,
     useNewUrlParser: true,
     useUnifiedTopology: true,
     useCreateIndex: true
 };
-if(process.env.MONGO_USERNAME !== undefined && process.env.MONGO_PASSWORD !== undefined && process.env.MONGO_USERNAME !== "" && process.env.MONGO_PASSWORD !== "") {
-    urlMongo = 'mongodb://' + process.env.MONGO_USERNAME + ':' + process.env.MONGO_PASSWORD
-        + '@' + process.env.MONGO_HOST + ':' + process.env.MONGO_PORT + '/' + process.env.MONGO_DATABASE
-}
-else {
-    urlMongo = 'mongodb://' + process.env.MONGO_HOST + ':' + process.env.MONGO_PORT + '/' + process.env.MONGO_DATABASE;
-}
-mongoose.connect(urlMongo , optionMongo);
+const urlMongo = 'mongodb://' + process.env.MONGO_HOST + ':' + process.env.MONGO_PORT + '/' + process.env.MONGO_DATABASE + "?authSource=admin"
+
+const connectWithRetry = function() {
+    return mongoose.connect(urlMongo , optionMongo, function(err) {
+        if (err) {
+            console.error('Failed to connect to mongo on startup - retrying in 1 sec', err);
+            setTimeout(connectWithRetry, 1000);
+        }
+    });
+};
+connectWithRetry();
 
 User.create({
     login: commander.login,
