@@ -10,7 +10,8 @@ const RESPONSE_LIMIT = 20;
 
 async function handleRequest(req, res) {
     let num = res.locals.lora_request.readInt8(0);
-    if (res.locals.lopy.currentReqNum < num) {
+    let displayRequest;
+    if ((res.locals.lopy.currentReqNum + 1) === num) {
         res.locals.lopy.currentReqNum = num;
         let order = 0;
         let length = res.locals.lora_request.length;
@@ -18,8 +19,8 @@ async function handleRequest(req, res) {
             order = res.locals.lora_request.readInt8(1);
         }
 
-        console.log("num = " + num);
-        console.log("order = " + order);
+        logger.debug("num = " + num);
+        logger.debug("order = " + order);
 
         let proceed = false;
         if([2, 6, 10].includes(order)) {
@@ -38,17 +39,17 @@ async function handleRequest(req, res) {
         }
 
         if(proceed === true) {
-            console.log("Can analyze the request");
-            console.log("request = " + res.locals.lopy.request);
+            logger.debug("Can analyze the request");
+            logger.debug("request = " + res.locals.lopy.request);
 
             if([2, 5].includes(order)) {
                 let conType = res.locals.lopy.request[0];
                 let espId = res.locals.lopy.request.substr(1);
-                console.log("conType = " + conType);
-                console.log("espId = " + espId);
+                logger.debug("conType = " + conType);
+                logger.debug("espId = " + espId);
                 if(conType === 'c') {
                     await Display.findOne({espId: espId}, function (err, display) {
-                        console.log("Display connection.");
+                        logger.debug("Display connection.");
                         if(!err && display) {
                             display.lastLopy = req.body.devEUI.toString();
                             display.lopyMessageSync = false;
@@ -59,7 +60,7 @@ async function handleRequest(req, res) {
                 }
                 else if(conType === 'd') {
                     Display.findOne({espId: espId}, function (err, display) {
-                        console.log("Display disconnection.");
+                        logger.debug("Display disconnection.");
                         if(!err && display) {
                             display.lastLopy = "null";
                             display.lopyMessageSync = false;
@@ -70,14 +71,14 @@ async function handleRequest(req, res) {
                 }
             }
             else if([6, 9].includes(order)) {
-                console.log("Store selection.");
+                logger.debug("Store selection.");
                 res.locals.lopy.currentReqExtraData = res.locals.lopy.request;
             }
             else if([10, 13].includes(order)) {
                 let espId = res.locals.lopy.currentReqExtraData;
                 let message = res.locals.lopy.request;
-                console.log("message = " + message);
-                console.log("espId = " + espId);
+                logger.debug("message = " + message);
+                logger.debug("espId = " + espId);
 
                 await Display.findOne({espId: espId}, function (err, display) {
                     if (typeof err !== 'undefined' && err !== null) {
@@ -111,65 +112,70 @@ async function handleRequest(req, res) {
             res.locals.lopy.request = "";
         }
 
-        res.locals.lopy.save();
+        if(order === 0) {
+            let display;
+            if(res.locals.lopy.currentSynching && res.locals.lopy.currentSynching !== "") {
+                display = await Display.findOne({espId: res.locals.lopy.currentSynching});
+            }
+            else {
+                let displays = await Display.find({
+                    lastLopy: req.body.devEUI,
+                    lopyMessageSync: false
+                });
+                if (displays && displays.length > 0) {
+                    display = displays[0];
+                }
+            }
+
+            if(display) {
+                if(display.lopyMessageSynching === false) {
+                    logger.debug("create requests...");
+                    display.lopyMessageSynching = true;
+                    res.locals.lopy.currentSynching = display.espId;
+                    // clear request, just in case
+                    while(display.lopyRequest.length > 0) {
+                        display.lopyRequest.pop();
+                    }
+                    const selection = splitRequest(display.espId, [6, 7, 8, 9]);
+                    const message = splitRequest(display.message, [10, 11, 12, 13]);
+                    Array.prototype.push.apply(display.lopyRequest, selection);
+                    Array.prototype.push.apply(display.lopyRequest, message);
+                    logger.debug("done. requests saved. : " + display.lopyRequest.toString());
+                }
+                if(display.lopyRequest.length === 0) {
+                    logger.debug("all requests sent, sync done");
+                    display.lopyMessageSynching = false;
+                    display.lopyMessageSync = true;
+                    res.locals.lopy.currentSynching = "";
+                }
+                else {
+                    displayRequest = display.lopyRequest[0];
+                    display.lopyRequest.shift();
+                }
+                await display.save();
+                await res.locals.lopy.save();
+            }
+        }
+
+
+        await res.locals.lopy.save();
     }
     else {
         num = res.locals.lopy.currentReqNum;
     }
 
-    let displayRequest;
-    let display;
-    if(res.locals.lopy.currentSynching && res.locals.lopy.currentSynching !== "") {
-        display = await Display.findOne({espId: res.locals.lopy.currentSynching});
-    }
-    else {
-        let displays = await Display.find({
-            lastLopy: req.body.devEUI,
-            lopyMessageSync: false
-        });
-        if (displays && displays.length > 0) {
-            display = displays[0];
-        }
-    }
-
-    if(display) {
-        if(display.lopyMessageSynching === false) {
-            console.log("create requests...");
-            display.lopyMessageSynching = true;
-            res.locals.lopy.currentSynching = display.espId;
-            // clear request, just in case
-            while(display.lopyRequest.length > 0) {
-                display.lopyRequest.pop();
-            }
-            const selection = splitRequest(display.espId, [6, 7, 8, 9]);
-            const message = splitRequest(display.message, [10, 11, 12, 13]);
-            Array.prototype.push.apply(display.lopyRequest, selection);
-            Array.prototype.push.apply(display.lopyRequest, message);
-            console.log("done. requests saved.");
-        }
-        if(display.lopyRequest.length === 0) {
-            console.log("all requests sent, sync done");
-            display.lopyMessageSynching = false;
-            display.lopyMessageSync = true;
-            res.locals.lopy.currentSynching = true;
-        }
-        else {
-            displayRequest = display.lopyRequest[0];
-            display.lopyRequest.shift();
-        }
-        display.save();
-        res.locals.lopy.save();
-    }
-
-    let data = Uint8Array.from(num);
+    logger.debug("num = " + num);
+    let data = Buffer.of(Uint8Array.of(num));
     if(displayRequest) {
         let buf_arr = [data , Buffer.from(displayRequest, 'hex')];
-        data = Buffer.concat(buf_arr).toString("base64");
+        data = Buffer.concat(buf_arr);
     }
+
+    logger.debug(data);
 
     let responseStruct = {
         'fPort': req.body.fPort,
-        'data': data,
+        'data': data.toString("base64"),
         'devEUI': req.body.devEUI
     };
 
@@ -183,14 +189,18 @@ async function handleRequestReset(req, res) {
     res.locals.lopy.currentReqNum = 0;
     res.locals.lopy.currentReqData = "";
     res.locals.lopy.currentReqExtraData = "";
-    res.locals.lopy.save();
+    res.locals.lopy.currentSynching = "";
+    await res.locals.lopy.save();
 
     Display.find({lastLopy: req.body.devEUI}, function (err, displays) {
         if(!err && displays) {
             displays.forEach(d => {
                 d.lastLopy = "null";
                 d.lopyMessageSync = false;
-                d.lopyMessageSeq = -1;
+                d.lopyMessageSynching = false;
+                while(d.lopyRequest.length > 0) {
+                    d.lopyRequest.pop();
+                }
                 d.save();
             });
         }
@@ -198,7 +208,7 @@ async function handleRequestReset(req, res) {
 
     let responseStruct = {
         'fPort': req.body.fPort,
-        'data': Buffer.from(Uint8Array.from(res.locals.lora_request.readInt8(0))).toString("base64"),
+        'data': Buffer.of(Uint8Array.of(res.locals.lora_request.readInt8(0))).toString("base64"),
         'devEUI': req.body.devEUI
     };
 
@@ -243,12 +253,11 @@ function splitRequest(data, orders) {
 }
 
 router.post('/', loraController.loraValidate, async function (req, res) {
-    console.log("start router lora");
+    logger.debug("router lora");
     try {
-        console.log("parsedData = " + util.inspect(res.locals.parsedData));
+        logger.debug("parsedData = " + util.inspect(res.locals.parsedData));
         res.locals.lora_request = Buffer.from(res.locals.parsedData, 'binary');
-        console.log("res.locals.lora_request created : " + util.inspect(res.locals.lora_request));
-        //logger.debug("lora_request = " + util.inspect(res.locals.lora_request));
+        logger.debug("res.locals.lora_request created : " + util.inspect(res.locals.lora_request));
 
         if (res.locals.lora_request.readInt8(0) === 0) {
             console.log("call handleRequestReset");
